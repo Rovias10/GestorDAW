@@ -1,0 +1,6 @@
+# Carpetas de dependencias de Node
+/node_modules
+/backend/node_modules
+
+npm-debug.log*
+package-lock.json
