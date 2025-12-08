@@ -3,18 +3,23 @@ const db = require("../config/database.js");
 exports.getAllProjects = async (req, res) => {
   try {
     const userID = req.user.id;
+    const query = `
+      SELECT p.*, 'owner' as role 
+      FROM projects p 
+      WHERE p.owner_id = ?
+      
+      UNION
+      
+      SELECT p.*, pc.role 
+      FROM projects p
+      JOIN project_collaborators pc ON p.id = pc.project_id
+      WHERE pc.user_id = ?
+      
+      ORDER BY created_at DESC
+    `;
 
-    const [projects] = await db.query(
-      "SELECT * FROM projects WHERE owner_id = ? ORDER BY created_at DESC",
-      [userID]
-    );
-
-    const projectWithRole = projects.map((project) => ({
-      ...project,
-      role: "owner",
-    }));
-
-    res.json(projectWithRole);
+    const [projects] = await db.query(query, [userID, userID]);
+    res.json(projects);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error al obtener los proyectos" });
@@ -53,9 +58,10 @@ exports.getProjectDetail = async (req, res) => {
   const currentUserId = req.user.id;
 
   try {
-    const [proyectos] = await db.query("SELECT * FROM projects WHERE id = ?", [
+    const [projects] = await db.query("SELECT * FROM projects WHERE id = ?", [
       projectId,
     ]);
+
     if (projects.length === 0) {
       return res.status(404).json({ message: "Proyecto no encontrado" });
     }
@@ -63,56 +69,65 @@ exports.getProjectDetail = async (req, res) => {
 
     let myRole = "viewer";
 
-    if (project.owner.id === currentUserId) {
+    if (project.owner_id === currentUserId) {
       myRole = "owner";
     } else {
-      comst[collab] = await db.query(
-        "SELECT role FROM project_collaborators WHERE project_id = ? AND user_id= ?",
-        [projectid, currentUserId]
+      const [collabs] = await db.query(
+        "SELECT role FROM project_collaborators WHERE project_id = ? AND user_id = ?",
+        [projectId, currentUserId]
       );
-      if (collabs.lenght > 0) {
+      if (collabs.length > 0) {
         myRole = collabs[0].role;
       }
     }
 
-    const [tasks] = await db.query(
-      `
-        SELECT t.* , u.name as assignee_name
-        FROM project-collaborators pc
-        JOIN users u ON pc.user_id = u.id
-        WHERE pc.project_id = ?`,
+    const [task] = await db.query(
+      `SELECT t.*, u.name as assignee_name 
+     FROM task t
+     LEFT JOIN users u ON t.user_id = u.id
+     WHERE t.project_id = ?`,
+      [projectId]
+    );
+
+    const [collaborators] = await db.query(
+      `SELECT u.id, u.name, u.email, pc.role 
+       FROM project_collaborators pc
+       JOIN users u ON pc.user_id = u.id
+       WHERE pc.project_id = ?`,
       [projectId]
     );
 
     const [owner] = await db.query(
-      `
-        SELECT id, name, email FROM users WHERE id = ?`,
+      `SELECT id, name, email FROM users WHERE id = ?`,
       [project.owner_id]
     );
-    if (owner.lenght > 0) {
+
+    if (owner.length > 0) {
       collaborators.unshift({ ...owner[0], role: "owner" });
     }
 
     res.json({
       project,
-      task,
+      tasks: task,
       collaborators,
       currentUserRole: myRole,
     });
-  } catch {
+  } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error al cargar detalles" });
   }
 };
 
 exports.addCollaborator = async (req, res) => {
-  const { projectId, email, role } = req.body;
+  const projectId = req.params.id;
+  const { email, role } = req.body;
 
   try {
     const [users] = await db.query("SELECT id FROM users WHERE email = ?", [
       email,
     ]);
-    if (users.lenght === 0) {
+
+    if (users.length === 0) {
       return res.status(404).json({ message: "Usuario no Encontrado" });
     }
 
@@ -123,7 +138,8 @@ exports.addCollaborator = async (req, res) => {
     );
 
     res.json({ message: "Invitación enviada" });
-  } catch {
+  } catch (error) {
+    console.error(error);
     if (error.code === "ER_DUP_ENTRY") {
       return res
         .status(400)
@@ -141,6 +157,7 @@ exports.deleteProject = async (req, res) => {
     ]);
     res.json({ message: "Proyecto eliminado" });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Error al eliminar" });
   }
 };
