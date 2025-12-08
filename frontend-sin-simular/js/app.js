@@ -295,12 +295,20 @@ if (document.getElementById("projectDetailName")) {
   $("#tasksTable tbody").on("click", ".btn-edit-task", function () {
     const taskId = $(this).data("id");
     const task = currentProject.tasks.find((t) => t.id == taskId);
+
     if (task) {
       document.getElementById("taskId").value = task.id;
       document.getElementById("taskModalTitle").textContent = "Editar Tarea";
+
+      // Campo Title (Correcto)
       document.getElementById("taskTitle").value = task.title;
+
+      // Campo Status (Correcto)
       document.getElementById("taskStatus").value = task.status;
-      document.getElementById("taskAssignee").value = task.assigned_to_user_id;
+
+      // CORRECCIÓN AQUÍ: Usar 'user_id' que viene de la BD, no 'assigned_to_user_id'
+      document.getElementById("taskAssignee").value = task.user_id;
+
       $("#taskModal").modal("show");
     }
   });
