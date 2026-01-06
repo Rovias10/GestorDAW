@@ -17,8 +17,20 @@
     <!-- AdminLTE css -->
     <link
       rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link
+      rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css"
     />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css"
+    />
+
+    <link rel="stylesheet" href="../../assets/css/modern-theme.css" />
   </head>
   <body class="hold-transition sidebar-mini">
     <!-- Auth Guard -->
@@ -35,6 +47,11 @@
           </li>
         </ul>
         <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#" role="button" id="darkModeToggle">
+              <i class="fas fa-moon"></i>
+            </a>
+          </li>
           <li class="nav-item dropdown user-menu">
             <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
               <img
@@ -75,9 +92,10 @@
 
       <!-- Menú Lateral -->
       <aside class="main-sidebar sidebar-dark-primary elevation-4">
-        <a href="../dashboard/index.html" class="brand-link">
+        <a href="index.html" class="brand-link">
           <span class="brand-text font-weight-light"><b>Gestor</b>DAW</span>
         </a>
+
         <div class="sidebar">
           <nav class="mt-2">
             <ul
@@ -87,7 +105,7 @@
               data-accordion="false"
             >
               <li class="nav-item">
-                <a href="../dashboard/index.html" class="nav-link">
+                <a href="index.html" class="nav-link">
                   <i class="nav-icon fas fa-tachometer-alt"></i>
                   <p>Dashboard</p>
                 </a>
@@ -99,7 +117,19 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="profile.html" class="nav-link active">
+                <a href="chat.html" class="nav-link">
+                  <i class="nav-icon fas fa-comments"></i>
+                  <p>Chat Global</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="calendar.html" class="nav-link">
+                  <i class="nav-icon fas fa-calendar-alt"></i>
+                  <p>Calendario</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="profile.html" class="nav-link">
                   <i class="nav-icon fas fa-user-cog"></i>
                   <p>Mi Perfil</p>
                 </a>

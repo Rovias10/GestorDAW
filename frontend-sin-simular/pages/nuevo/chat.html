@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chat | GestorDAW</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css"
+    />
+    <link rel="stylesheet" href="../../assets/css/modern-theme.css">
+    <style>
+      /* Ajuste para que el chat ocupe la altura correcta en AdminLTE */
+      .chat-wrapper {
+        height: calc(100vh - 120px);
+        display: flex;
+        background: white;
+        border: 1px solid #ddd;
+      }
+      .chat-list {
+        width: 280px;
+        border-right: 1px solid #ddd;
+        overflow-y: auto;
+        background: #f8f9fa;
+      }
+      .chat-box {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        background: #fff;
+      }
+      .project-item {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+      }
+      .project-item:hover,
+      .project-item.active {
+        background: #e2e6ea;
+        border-left: 4px solid #007bff;
+      }
+    </style>
+  </head>
+  <body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+      <div class="content-wrapper">
+        <section class="content-header">
+          <div class="container-fluid">
+            <h1>Centro de Mensajes</h1>
+          </div>
+        </section>
+
+        <section class="content">
+          <div class="container-fluid">
+            <div
+              class="card card-primary card-outline direct-chat direct-chat-primary"
+            >
+              <div class="card-body p-0">
+                <div class="chat-wrapper">
+                  <div class="chat-list" id="projectsList">
+                    <div class="text-center p-3 text-muted">Cargando...</div>
+                  </div>
+
+                  <div class="chat-box">
+                    <div
+                      id="chatHeader"
+                      class="p-3 border-bottom bg-light font-weight-bold"
+                      style="display: none"
+                    >
+                      Selecciona un proyecto
+                    </div>
+                    <div
+                      id="messagesArea"
+                      class="chat-messages direct-chat-messages"
+                    >
+                      <div
+                        class="h-100 d-flex align-items-center justify-content-center text-muted"
+                      >
+                        <i class="fas fa-comments fa-3x mb-3"></i><br />
+                        Selecciona un proyecto para chatear
+                      </div>
+                    </div>
+                    <div
+                      class="card-footer"
+                      id="inputArea"
+                      style="display: none"
+                    >
+                      <form id="chatForm">
+                        <div class="input-group">
+                          <input
+                            type="text"
+                            id="messageInput"
+                            placeholder="Escribir mensaje..."
+                            class="form-control"
+                          />
+                          <span class="input-group-append">
+                            <button type="submit" class="btn btn-primary">
+                              Enviar
+                            </button>
+                          </span>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="main-footer">...</footer>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="../js/api-service.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
+
+    <script>
+      const socket = io();
+      let currentProjectId = null;
+      const currentUser = JSON.parse(localStorage.getItem("user"));
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetProjectId = urlParams.get("projectId");
+
+      async function loadProjects() {
+        try {
+          const projects = await apiService.fetch("/projects");
+          const list = document.getElementById("projectsList");
+          list.innerHTML = "";
+
+          projects.forEach((p) => {
+            const div = document.createElement("div");
+            div.className = "project-item";
+
+            if (targetProjectId && p.id == targetProjectId) {
+              div.classList.add("active");
+              selectProject(p.id, p.name);
+            }
+
+            div.innerHTML = `
+                    <h6 class="m-0 text-dark">${p.name}</h6>
+                    <small class="text-muted">${p.role}</small>
+                `;
+            div.onclick = () => {
+              document
+                .querySelectorAll(".project-item")
+                .forEach((e) => e.classList.remove("active"));
+              div.classList.add("active");
+              selectProject(p.id, p.name);
+            };
+            list.appendChild(div);
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      async function selectProject(id, name) {
+        currentProjectId = id;
+        document.getElementById("chatHeader").innerText = name;
+        document.getElementById("chatHeader").style.display = "block";
+        document.getElementById("inputArea").style.display = "block";
+        document.getElementById("messagesArea").innerHTML =
+          '<div class="text-center p-3">Cargando...</div>';
+
+        socket.emit("join_project", id);
+
+        try {
+          const msgs = await apiService.fetch(`/projects/${id}/messages`);
+          renderMessages(msgs);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      function renderMessages(messages) {
+        const area = document.getElementById("messagesArea");
+        area.innerHTML = "";
+        messages.forEach((msg) => appendMessage(msg));
+        area.scrollTop = area.scrollHeight;
+      }
+
+      function appendMessage(data) {
+        const area = document.getElementById("messagesArea");
+        const isMe = data.user_id == currentUser.id;
+
+        const html = `
+            <div class="direct-chat-msg ${isMe ? "right" : ""}">
+                <div class="direct-chat-infos clearfix">
+                    <span class="direct-chat-name float-${
+                      isMe ? "right" : "left"
+                    }">${data.name || "Usuario"}</span>
+                    <span class="direct-chat-timestamp float-${
+                      isMe ? "left" : "right"
+                    }">${new Date(data.created_at).toLocaleTimeString()}</span>
+                </div>
+                <div class="direct-chat-text">
+                    ${data.message}
+                </div>
+            </div>
+        `;
+        area.insertAdjacentHTML("beforeend", html);
+        area.scrollTop = area.scrollHeight;
+      }
+
+      document.getElementById("chatForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const input = document.getElementById("messageInput");
+        if (!input.value.trim() || !currentProjectId) return;
+
+        socket.emit("send_message", {
+          projectId: currentProjectId,
+          userId: currentUser.id,
+          message: input.value,
+        });
+        input.value = "";
+      });
+
+      socket.on("receive_message", (data) => {
+        if (data.projectId == currentProjectId) appendMessage(data);
+      });
+
+      loadProjects();
+    </script>
+  </body>
+</html>

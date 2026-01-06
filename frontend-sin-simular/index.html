@@ -1,14 +1,178 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Inicio</title>
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
-  </head>
-  <body class="bg-light">
-    <div class="container mt-5 text-center">
-      <h1>Bienvenido</h1>
-      <a class="btn btn-primary" href="pages/dashboard/index.html">Ir al login</a>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido | GestorDAW</title>
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap">
+    
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   
+    <link rel="stylesheet" href="assets/css/modern-theme.css">
+    
+    <style>
+        body {
+          background-image: url('img/bg-tech.svg');
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          background-attachment: fixed;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            margin: 0;
+        }
+        
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.75);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            color: #fff;
+        }
+
+        .brand-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            background: linear-gradient(to right, #ffffff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #cbd5e1;
+            max-width: 650px;
+            margin-bottom: 3.5rem;
+            line-height: 1.7;
+            font-weight: 400;
+        }
+
+        .btn-xl {
+            padding: 16px 45px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            margin: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-landing-primary {
+            background: #4318ff;
+            color: white;
+            border: none;
+            box-shadow: 0 10px 30px -5px rgba(67, 24, 255, 0.5);
+        }
+        .btn-landing-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -5px rgba(67, 24, 255, 0.6);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-landing-outline {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+        }
+        .btn-landing-outline:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: white;
+            color: white;
+            transform: translateY(-4px);
+            text-decoration: none;
+        }
+
+        .custom-nav {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 20;
+            padding: 25px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .custom-nav { padding: 20px; }
+            .btn-xl { width: 100%; margin: 10px 0; }
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="hero-overlay"></div>
+
+    <nav class="custom-nav">
+        <a href="#" class="brand-logo">
+            <i class="fas fa-layer-group" style="color: #4318ff;"></i> GestorDAW
+        </a>
+        <div>
+            <a href="pages/quienes-somos.html" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                ¿Quiénes Somos?
+            </a>
+        </div>
+    </nav>
+
+    <div class="hero-content">
+        <h1 class="hero-title animate__animated animate__fadeInUp">
+            Gestiona tus Sueños <br> Haz realidad tus proyectos
+        </h1>
+        <p class="hero-subtitle">
+            Organiza tareas, colabora con tu equipo en tiempo real y mantén el control total de tu flujo de trabajo. 
+            Simple, rápido y potente.
+        </p>
+        
+        <div class="d-flex flex-wrap justify-content-center w-100">
+            <a href="pages/auth/login.html" class="btn btn-xl btn-landing-primary">
+                <i class="fas fa-sign-in-alt mr-2"></i> Iniciar Sesión
+            </a>
+            <a href="pages/auth/register.html" class="btn btn-xl btn-landing-outline">
+                <i class="fas fa-user-plus mr-2"></i> Crear Cuenta
+            </a>
+        </div>
     </div>
-  </body>
+
+</body>
 </html>

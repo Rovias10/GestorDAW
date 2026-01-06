@@ -1,4 +1,5 @@
 const db = require("../config/database.js");
+const sendEmail = require("./config/mailer.js");
 
 exports.getMe = async (req, res) => {
   try {
@@ -28,6 +29,30 @@ exports.updateMe = async (req, res) => {
       req.user.id,
     ]);
 
+    if (req.user && req.user.email) {
+      try {
+        console.log("Enviando aviso de actualización a: " + req.user.email);
+
+        await sendEmail(
+          req.user.email,
+          "Perfil Actualizado - GestorDAW",
+          `
+          <div style="font-family: Arial, sans-serif;">
+            <h1>Hola ${name}</h1>
+            <p>Te confirmamos que has actualizado tu perfil correctamente.</p>
+            <p>Si no has sido tú, por favor contacta con soporte inmediatamente.</p>
+          </div>
+          `
+        );
+      } catch (mailError) {
+        console.error(
+          "El perfil se actualizó, pero el correo falló:",
+          mailError.message
+        );
+      }
+    } else {
+      console.log("No se encontró el email en el token, correo no enviado.");
+    }
     res.json({ message: "Perfil actualizado correctamente" });
   } catch (error) {
     console.error(error);

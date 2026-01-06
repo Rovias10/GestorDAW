@@ -4,33 +4,39 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Detalle de Proyecto | Gestor de Proyectos</title>
-    <!-- Google Font: Source Sans Pro -->
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"
     />
-    <!-- Font Awesome -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <!-- DataTables -->
     <link
       rel="stylesheet"
       href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css"
     />
-    <!-- AdminLTE css -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css"
+    />
+    <link rel="stylesheet" href="../../assets/css/modern-theme.css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
   </head>
   <body class="hold-transition sidebar-mini">
-    <!-- Auth Guard -->
     <script type="module" src="../../js/auth-guard.js"></script>
 
     <div class="wrapper">
-      <!-- Header -->
       <nav class="main-header navbar navbar-expand navbar-white navbar-light">
         <ul class="navbar-nav">
           <li class="nav-item">
@@ -40,6 +46,11 @@
           </li>
         </ul>
         <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#" role="button" id="darkModeToggle">
+              <i class="fas fa-moon"></i>
+            </a>
+          </li>
           <li class="nav-item dropdown user-menu">
             <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
               <img
@@ -78,11 +89,11 @@
         </ul>
       </nav>
 
-      <!-- Menú Lateral -->
       <aside class="main-sidebar sidebar-dark-primary elevation-4">
-        <a href="../dashboard/index.html" class="brand-link">
+        <a href="index.html" class="brand-link">
           <span class="brand-text font-weight-light"><b>Gestor</b>DAW</span>
         </a>
+
         <div class="sidebar">
           <nav class="mt-2">
             <ul
@@ -92,16 +103,27 @@
               data-accordion="false"
             >
               <li class="nav-item">
-                <a href="../dashboard/index.html" class="nav-link">
+                <a href="index.html" class="nav-link">
                   <i class="nav-icon fas fa-tachometer-alt"></i>
                   <p>Dashboard</p>
                 </a>
               </li>
               <li class="nav-item">
                 <a href="projects.html" class="nav-link active">
-                  <!-- Activo porque es sub-página -->
                   <i class="nav-icon fas fa-folder"></i>
                   <p>Proyectos</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="chat.html" class="nav-link">
+                  <i class="nav-icon fas fa-comments"></i>
+                  <p>Chat Global</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="calendar.html" class="nav-link">
+                  <i class="nav-icon fas fa-calendar-alt"></i>
+                  <p>Calendario</p>
                 </a>
               </li>
               <li class="nav-item">
@@ -115,7 +137,6 @@
         </div>
       </aside>
 
-      <!-- Contenido Principal -->
       <div class="content-wrapper">
         <div class="content-header">
           <div class="container-fluid">
@@ -124,14 +145,14 @@
                 <h1 class="m-0" id="projectDetailName">Cargando...</h1>
               </div>
               <div class="col-sm-6">
-                <!-- Botones Nivel 3 - se mostrarán/ocultarán con JS según el ROL -->
                 <button
                   id="deleteProjectButton"
                   class="btn btn-danger float-sm-right ml-2 permission-owner"
                   style="display: none"
                 >
-                  <i class="fas fa-trash"></i> Borrar Proyecto
+                  <i class="fas fa-trash"></i> Borrar
                 </button>
+
                 <button
                   id="inviteUserButton"
                   class="btn btn-success float-sm-right ml-2 permission-owner-editor"
@@ -141,51 +162,209 @@
                 >
                   <i class="fas fa-user-plus"></i> Invitar
                 </button>
+
                 <button
                   id="createTaskButton"
-                  class="btn btn-primary float-sm-right permission-owner-editor"
+                  class="btn btn-primary float-sm-right ml-2 permission-owner-editor"
                   style="display: none"
                   data-toggle="modal"
                   data-target="#taskModal"
                 >
-                  <i class="fas fa-plus"></i> Nueva Tarea
+                  <i class="fas fa-plus"></i> Tarea
+                </button>
+
+                <a
+                  href="#"
+                  id="btnOpenChat"
+                  class="btn btn-info float-sm-right ml-2"
+                >
+                  <i class="fas fa-comments"></i> Chat
+                </a>
+
+                <button
+                  id="viewToggleBtn"
+                  class="btn btn-outline-primary float-sm-right"
+                >
+                  <i class="fas fa-columns"></i> Tablero
                 </button>
               </div>
             </div>
           </div>
         </div>
+
         <section class="content">
           <div class="container-fluid">
             <div class="row">
-              <!-- Tareas (Nivel 2) -->
               <div class="col-md-8">
-                <div class="card card-primary card-outline">
-                  <div class="card-header">
-                    <h3 class="card-title">Lista de Tareas</h3>
+                <div class="card card-primary card-outline card-outline-tabs">
+                  <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" role="tablist">
+                      <li class="nav-item">
+                        <a
+                          class="nav-link active"
+                          id="tasks-tab"
+                          data-toggle="pill"
+                          href="#tasks"
+                          role="tab"
+                          >Tareas</a
+                        >
+                      </li>
+                      <li class="nav-item">
+                        <a
+                          class="nav-link"
+                          id="calendar-tab"
+                          data-toggle="pill"
+                          href="#calendarView"
+                          role="tab"
+                          >Calendario</a
+                        >
+                      </li>
+                      <li class="nav-item">
+                        <a
+                          class="nav-link"
+                          id="activity-tab"
+                          data-toggle="pill"
+                          href="#activity"
+                          role="tab"
+                          >Historial</a
+                        >
+                      </li>
+                    </ul>
                   </div>
                   <div class="card-body">
-                    <table
-                      id="tasksTable"
-                      class="table table-bordered table-striped"
-                      style="width: 100%"
-                    >
-                      <thead>
-                        <tr>
-                          <th>ID</th>
-                          <th>Título</th>
-                          <th>Asignado a</th>
-                          <th>Estado</th>
-                          <th>Acciones</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <!-- Tareas con JS -->
-                      </tbody>
-                    </table>
+                    <div class="tab-content">
+                      <div
+                        class="tab-pane fade show active"
+                        id="tasks"
+                        role="tabpanel"
+                      >
+                        <div class="mb-3 d-flex flex-wrap" style="gap: 10px">
+                          <button
+                            class="btn btn-sm btn-outline-secondary active filter-btn"
+                            data-filter="all"
+                          >
+                            Todos
+                          </button>
+                          <button
+                            class="btn btn-sm btn-outline-primary filter-btn"
+                            data-filter="mine"
+                          >
+                            <i class="fas fa-user"></i> Mis Tareas
+                          </button>
+                          <button
+                            class="btn btn-sm btn-outline-warning filter-btn"
+                            data-filter="urgent"
+                          >
+                            <i class="fas fa-fire"></i> Urgentes
+                          </button>
+                          <button
+                            class="btn btn-sm btn-outline-success filter-btn"
+                            data-filter="completed"
+                          >
+                            <i class="fas fa-check"></i> Completadas
+                          </button>
+                          <button
+                            class="btn btn-sm btn-outline-danger filter-btn"
+                            data-filter="pending"
+                          >
+                            <i class="fas fa-clock"></i> Pendientes
+                          </button>
+                        </div>
+                        <table
+                          id="tasksTable"
+                          class="table table-bordered table-striped"
+                          style="width: 100%"
+                        >
+                          <thead>
+                            <tr>
+                              <th>ID</th>
+                              <th>Título</th>
+                              <th>Prioridad</th>
+                              <th>Tiempo</th>
+                              <th>Asignado a</th>
+                              <th>Estado</th>
+                              <th>Acciones</th>
+                            </tr>
+                          </thead>
+                          <tbody></tbody>
+                        </table>
+                      </div>
+
+                      <div
+                        class="tab-pane fade"
+                        id="calendarView"
+                        role="tabpanel"
+                      >
+                        <div class="p-3">
+                          <div id="calendar"></div>
+                        </div>
+                      </div>
+
+                      <div class="tab-pane fade" id="activity" role="tabpanel">
+                        <div
+                          id="activityList"
+                          class="timeline timeline-inverse"
+                        >
+                          <p class="text-center text-muted mt-3">
+                            Cargando historial...
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="kanbanView" class="row" style="display: none">
+                  <div class="col-md-4">
+                    <div class="card card-row card-secondary">
+                      <div class="card-header">
+                        <h3 class="card-title">Pendiente</h3>
+                      </div>
+                      <div class="card-body">
+                        <div
+                          id="kanban-pending"
+                          class="kanban-column"
+                          data-status="pending"
+                          style="min-height: 200px"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="card card-row card-primary">
+                      <div class="card-header">
+                        <h3 class="card-title">En Progreso</h3>
+                      </div>
+                      <div class="card-body">
+                        <div
+                          id="kanban-in_progress"
+                          class="kanban-column"
+                          data-status="in_progress"
+                          style="min-height: 200px"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="card card-row card-success">
+                      <div class="card-header">
+                        <h3 class="card-title">Completada</h3>
+                      </div>
+                      <div class="card-body">
+                        <div
+                          id="kanban-completed"
+                          class="kanban-column"
+                          data-status="completed"
+                          style="min-height: 200px"
+                        ></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <!-- Colaboradores (Nivel 3) -->
+
               <div class="col-md-4">
                 <div class="card card-primary card-outline">
                   <div class="card-header">
@@ -195,9 +374,7 @@
                     <ul
                       class="list-group list-group-flush"
                       id="collaboratorsList"
-                    >
-                      <!-- Colaboradores con JS -->
-                    </ul>
+                    ></ul>
                   </div>
                 </div>
               </div>
@@ -206,16 +383,13 @@
         </section>
       </div>
 
-      <!-- Footer -->
       <footer class="main-footer">
         <strong
           >Copyright &copy; 2024-2025 <a href="#">Proyecto DAW</a>.</strong
         >
       </footer>
     </div>
-    <!-- ./wrapper -->
 
-    <!-- Modal Tarea -->
     <div class="modal fade" id="taskModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -228,15 +402,48 @@
           <div class="modal-body">
             <form id="taskForm">
               <input type="hidden" id="taskId" />
+
               <div class="form-group">
-                <label for="taskTitle">Título</label>
+                <label for="taskTitle">Título *</label>
                 <input
                   type="text"
                   class="form-control"
                   id="taskTitle"
                   required
+                  placeholder="Ej: Corregir bug del login"
                 />
               </div>
+
+              <div class="form-group">
+                <label for="taskDescription">Descripción</label>
+                <textarea
+                  class="form-control"
+                  id="taskDescription"
+                  rows="3"
+                  placeholder="Detalles de la tarea..."
+                ></textarea>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="taskPriority">Prioridad</label>
+                    <select class="form-control" id="taskPriority">
+                      <option value="low">Baja 🟢</option>
+                      <option value="medium" selected>Media 🟡</option>
+                      <option value="high">Alta 🟠</option>
+                      <option value="critical">Crítica 🔴</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="taskDueDate">Fecha Límite</label>
+                    <input type="date" class="form-control" id="taskDueDate" />
+                  </div>
+                </div>
+              </div>
+
               <div class="form-group">
                 <label for="taskStatus">Estado</label>
                 <select class="form-control" id="taskStatus">
@@ -245,12 +452,12 @@
                   <option value="completed">Completada</option>
                 </select>
               </div>
+
               <div class="form-group">
                 <label for="taskAssignee">Asignar a:</label>
-                <select class="form-control" id="taskAssignee">
-                  <!-- Opciones cargadas con JS -->
-                </select>
+                <select class="form-control" id="taskAssignee"></select>
               </div>
+
               <div
                 id="taskError"
                 class="text-danger mt-2"
@@ -274,7 +481,6 @@
       </div>
     </div>
 
-    <!-- Modal Invitar -->
     <div class="modal fade" id="inviteModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -300,7 +506,6 @@
                 <select class="form-control" id="inviteRole">
                   <option value="viewer">Lector (Viewer)</option>
                   <option value="editor">Editor</option>
-                  <!-- Solo un 'owner' puede nombrar a otro 'owner' -->
                   <option
                     value="owner"
                     class="permission-owner"
@@ -333,16 +538,21 @@
       </div>
     </div>
 
-    <!-- jQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <!-- Bootstrap 4 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
-    <!-- DataTables -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
-    <!-- AdminLTE App -->
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
-    <!-- JS Logic -->
     <script type="module" src="../../js/app.js"></script>
   </body>
 </html>

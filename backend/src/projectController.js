@@ -4,13 +4,21 @@ exports.getAllProjects = async (req, res) => {
   try {
     const userID = req.user.id;
     const query = `
-      SELECT p.*, 'owner' as role 
+      SELECT 
+        p.*, 
+        'owner' as role,
+        (SELECT COUNT(*) FROM task WHERE project_id = p.id) as total_tasks,
+        (SELECT COUNT(*) FROM task WHERE project_id = p.id AND status = 'completed') as completed_tasks
       FROM projects p 
       WHERE p.owner_id = ?
       
       UNION
       
-      SELECT p.*, pc.role 
+      SELECT 
+        p.*, 
+        pc.role,
+        (SELECT COUNT(*) FROM task WHERE project_id = p.id) as total_tasks,
+        (SELECT COUNT(*) FROM task WHERE project_id = p.id AND status = 'completed') as completed_tasks
       FROM projects p
       JOIN project_collaborators pc ON p.id = pc.project_id
       WHERE pc.user_id = ?
@@ -159,5 +167,23 @@ exports.deleteProject = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error al eliminar" });
+  }
+};
+
+exports.getChatMessages = async (req, res) => {
+  const projectId = req.params.id;
+  try {
+    const [messages] = await db.query(
+      `SELECT pm.*, u.name 
+       FROM project_messages pm
+       JOIN users u ON pm.user_id = u.id
+       WHERE pm.project_id = ?
+       ORDER BY pm.created_at ASC`,
+      [projectId]
+    );
+    res.json(messages);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al cargar mensajes" });
   }
 };

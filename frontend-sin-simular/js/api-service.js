@@ -1,12 +1,13 @@
 const API_URL = "http://localhost:3000/api";
 
-// --- Funciones de Token ---
 export function guardarToken(token) {
   localStorage.setItem("jwt", token);
 }
+
 export function obtenerToken() {
   return localStorage.getItem("jwt");
 }
+
 export function borrarToken() {
   localStorage.removeItem("jwt");
 }
@@ -19,7 +20,7 @@ export function decodificarToken() {
     const payloadJson = atob(payloadBase64);
     return JSON.parse(payloadJson);
   } catch (e) {
-    console.error("Error decodificando token:", e);
+    console.error(e);
     borrarToken();
     return null;
   }
@@ -42,35 +43,50 @@ async function fetchConAuth(url, options = {}) {
     headers: headers,
   };
 
-  const response = await fetch(url, config);
+  try {
+    const response = await window.fetch(url, config);
 
-  if (response.status === 401) {
-    borrarToken();
-    window.location.href = "../auth/login.html";
-    return Promise.reject(new Error("Token inválido o expirado."));
+    if (response.status === 401) {
+      borrarToken();
+      window.location.href = "../auth/login.html";
+      throw new Error("Sesión expirada");
+    }
+
+    if (response.status === 204) {
+      return { success: true };
+    }
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `Error ${response.status}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
-
-  if (response.status === 204) {
-    return { success: true };
-  }
-
-  if (!response.ok) {
-    // Intentar parsear el error del backend
-    const errorData = await response.json().catch(() => ({}));
-    return Promise.reject(
-      errorData || new Error(`Error ${response.status}: ${response.statusText}`)
-    );
-  }
-
-  return response.json();
 }
 
-// --- AUTH (Nivel 1) ---
-export function login(email, password) {
-  return fetchConAuth(`${API_URL}/auth/login`, {
+export const fetch = (endpoint, options) => fetchConAuth(`${API_URL}${endpoint}`, options);
+
+export async function login(email, password) {
+  const response = await window.fetch(`${API_URL}/auth/login`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ email, password }),
   });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Error al iniciar sesión");
+  }
+
+  return data;
 }
 
 export function register(name, email, password) {
@@ -80,16 +96,31 @@ export function register(name, email, password) {
   });
 }
 
-/**
- * Obtiene el perfil del usuario logueado
- */
+export function verifyAccount(token) {
+  return fetchConAuth(`${API_URL}/auth/verify`, {
+    method: "POST",
+    body: JSON.stringify({ token }),
+  });
+}
+
+export function forgotPassword(email) {
+  return fetchConAuth(`${API_URL}/auth/forgot-password`, {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function resetPassword(token, newPassword) {
+  return fetchConAuth(`${API_URL}/auth/reset-password`, {
+    method: "POST",
+    body: JSON.stringify({ token, newPassword }),
+  });
+}
+
 export function getMiPerfil() {
   return fetchConAuth(`${API_URL}/users/me`);
 }
 
-/**
- * Actualiza el perfil del usuario logueado
- */
 export function updateMiPerfil(name, avatar_url) {
   return fetchConAuth(`${API_URL}/users/me`, {
     method: "PUT",
@@ -97,25 +128,10 @@ export function updateMiPerfil(name, avatar_url) {
   });
 }
 
-// --- DASHBOARD (Nivel 2) ---
-/**
- * Obtiene las estadísticas para el dashboard
- */
-export function getDashboardStats() {
-  return fetchConAuth(`${API_URL}/stats/dashboard`);
-}
-
-// --- PROYECTOS (Nivel 2) ---
-/**
- * Obtiene la lista de proyectos del usuario
- */
 export function getProjects() {
   return fetchConAuth(`${API_URL}/projects`);
 }
 
-/**
- * Crea un nuevo proyecto
- */
 export function createProject(name, description) {
   return fetchConAuth(`${API_URL}/projects`, {
     method: "POST",
@@ -123,59 +139,61 @@ export function createProject(name, description) {
   });
 }
 
-/**
- * Obtiene los detalles de UN proyecto (incluye tareas y colaboradores)
- */
-export function getProjectDetails(projectId) {
-  return fetchConAuth(`${API_URL}/projects/${projectId}`);
+export function getProjectDetails(id) {
+  return fetchConAuth(`${API_URL}/projects/${id}`);
 }
 
-/**
- * Borra un proyecto (Solo 'owner')
- */
-export function deleteProject(projectId) {
-  return fetchConAuth(`${API_URL}/projects/${projectId}`, {
+export function deleteProject(id) {
+  return fetchConAuth(`${API_URL}/projects/${id}`, {
     method: "DELETE",
   });
 }
 
-// --- TAREAS (Nivel 2) ---
-/**
- * Crea una nueva tarea en un proyecto
- */
-export function createTask(projectId, title, status, assigned_to_user_id) {
-  return fetchConAuth(`${API_URL}/projects/${projectId}/tasks`, {
+export function inviteUserToProject(projectId, email, role) {
+  return fetchConAuth(`${API_URL}/projects/${projectId}/invite`, {
     method: "POST",
-    body: JSON.stringify({ title, status, assigned_to_user_id }),
+    body: JSON.stringify({ email, role }),
   });
 }
 
-/**
- * Actualiza una tarea
- */
-export function updateTask(taskId, data) {
+export function createTaskExtended(projectId, taskData) {
+  return fetchConAuth(`${API_URL}/tasks/project/${projectId}`, {
+    method: "POST",
+    body: JSON.stringify(taskData),
+  });
+}
+
+export function updateTask(taskId, taskData) {
   return fetchConAuth(`${API_URL}/tasks/${taskId}`, {
     method: "PUT",
-    body: JSON.stringify(data),
+    body: JSON.stringify(taskData),
   });
 }
 
-/**
- * Borra una tarea
- */
 export function deleteTask(taskId) {
   return fetchConAuth(`${API_URL}/tasks/${taskId}`, {
     method: "DELETE",
   });
 }
 
-// --- COLABORADORES (Nivel 3) ---
-/**
- * Invita un usuario a un proyecto
- */
-export function inviteUserToProject(projectId, email, role) {
-  return fetchConAuth(`${API_URL}/projects/${projectId}/invite`, {
-    method: "POST",
-    body: JSON.stringify({ email, role }),
+export function getDashboardStats() {
+  return fetchConAuth(`${API_URL}/stats/dashboard`);
+}
+
+export function getMyTasks() {
+  return fetchConAuth(`${API_URL}/tasks/my-tasks`);
+}
+
+export function toggleTaskTimer(taskId) {
+  return fetchConAuth(`${API_URL}/tasks/${taskId}/timer`, {
+    method: "POST"
   });
+}
+
+export function getProjectMessages(projectId) {
+  return fetchConAuth(`${API_URL}/projects/${projectId}/messages`);
+}
+
+export function getProjectActivity(projectId) {
+  return fetchConAuth(`${API_URL}/projects/${projectId}/activity`);
 }

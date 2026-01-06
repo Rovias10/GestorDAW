@@ -1,0 +1,387 @@
+/* -----------------------------------------------------------
+   MODERN THEME V2.0 - "SaaS Premium Look"
+   ----------------------------------------------------------- */
+
+/* 1. FUENTE Y BASE */
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap");
+
+:root {
+  --bg-body: #f4f7fe; /* Fondo gris azulado muy claro */
+  --text-main: #2b3674; /* Azul oscuro casi negro para texto */
+  --text-light: #a3aed0;
+  --primary-color: #4318ff;
+  --card-radius: 20px;
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+body {
+  font-family: "Plus Jakarta Sans", sans-serif !important;
+  background-color: var(--bg-body) !important;
+  color: var(--text-main) !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-main) !important;
+  font-weight: 700 !important;
+}
+
+/* 2. SIDEBAR (MENÚ LATERAL) ELEGANTE */
+.main-sidebar {
+  background: #ffffff !important; /* Blanco limpio */
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.02) !important;
+  border-right: none !important;
+}
+
+/* Logo */
+.brand-link {
+  background: transparent !important;
+  border-bottom: 1px solid #f4f7fe !important;
+  color: var(--primary-color) !important;
+  text-align: center;
+}
+.brand-text {
+  font-weight: 800 !important;
+  font-size: 1.3rem;
+  letter-spacing: -1px;
+}
+
+/* Enlaces del menú */
+.nav-sidebar .nav-item .nav-link {
+  color: #8f9bba !important;
+  font-weight: 500;
+  margin: 5px 10px;
+  border-radius: 12px !important;
+  padding: 12px 20px !important;
+  transition: var(--transition);
+}
+
+.nav-sidebar .nav-item .nav-link:hover {
+  background-color: rgba(67, 24, 255, 0.05) !important;
+  color: var(--primary-color) !important;
+}
+
+.nav-sidebar .nav-item .nav-link.active {
+  background: var(--primary-color) !important;
+  color: white !important;
+  box-shadow: 0 10px 20px -5px rgba(67, 24, 255, 0.4) !important;
+}
+
+.nav-sidebar .nav-item .nav-link.active i {
+  color: white !important;
+}
+
+/* 3. TARJETAS DE ESTADÍSTICAS (Las cajas de colores) */
+/* Hack para sobrescribir los colores feos de AdminLTE con Gradientes */
+
+.small-box {
+  border-radius: var(--card-radius) !important;
+  box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+  padding: 20px 0;
+}
+
+.small-box:hover {
+  transform: translateY(-5px) scale(1.02);
+}
+
+.small-box h3 {
+  font-size: 2.5rem !important;
+  font-weight: 800;
+  color: white !important;
+  margin-bottom: 0 !important;
+}
+.small-box p {
+  font-size: 1rem !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 500;
+}
+.small-box .icon {
+  color: rgba(255, 255, 255, 0.2) !important;
+  top: 20px;
+  right: 20px;
+  font-size: 70px !important;
+}
+
+/* Eliminar el footer feo de "More info" y hacerlo transparente */
+.small-box > .small-box-footer {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 600;
+  padding-top: 15px;
+  z-index: 2;
+  position: relative;
+}
+
+/* GRADIENTES PERSONALIZADOS */
+.bg-info {
+  background: linear-gradient(135deg, #868cff 0%, #4318ff 100%) !important;
+} /* Azul Violeta */
+.bg-success {
+  background: linear-gradient(135deg, #05cd99 0%, #02aab0 100%) !important;
+} /* Verde Esmeralda */
+.bg-warning {
+  background: linear-gradient(135deg, #ffb547 0%, #ff7b5f 100%) !important;
+} /* Naranja Atardecer */
+.bg-danger {
+  background: linear-gradient(135deg, #ee5d50 0%, #bd3333 100%) !important;
+} /* Rojo Intenso */
+.bg-primary {
+  background: linear-gradient(135deg, #2d62ed 0%, #5f8afe 100%) !important;
+} /* Azul Eléctrico */
+
+/* 4. TARJETAS GENERALES (Cards) */
+.card {
+  border-radius: var(--card-radius) !important;
+  border: none !important;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.03) !important;
+  background: white;
+  margin-bottom: 25px !important;
+}
+
+.card-header {
+  background: transparent !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+  padding: 20px 25px !important;
+}
+
+.card-title {
+  font-size: 1.1rem !important;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* 5. TABLAS MODERNAS (Estilo Stripe/Linear) */
+.table {
+  margin-bottom: 0 !important;
+}
+
+.table thead th {
+  border-top: none !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  color: var(--text-light) !important;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 15px 20px !important;
+}
+
+.table tbody td {
+  border-top: 1px solid #f8f9fa !important;
+  padding: 18px 20px !important;
+  vertical-align: middle !important;
+  color: var(--text-main);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* Hover en filas */
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: transparent !important; /* Quitamos el gris feo de bootstrap */
+}
+.table tbody tr:hover {
+  background-color: #f9faff !important;
+}
+
+/* 6. BADGES (Etiquetas) */
+.badge {
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+.badge-success {
+  background: rgba(5, 205, 153, 0.15) !important;
+  color: #05cd99 !important;
+}
+.badge-warning {
+  background: rgba(255, 181, 71, 0.15) !important;
+  color: #ffb547 !important;
+}
+.badge-danger {
+  background: rgba(238, 93, 80, 0.15) !important;
+  color: #ee5d50 !important;
+}
+.badge-info {
+  background: rgba(67, 24, 255, 0.1) !important;
+  color: #4318ff !important;
+}
+.badge-secondary {
+  background: #eff4fb !important;
+  color: #757575 !important;
+}
+
+/* 7. BOTONES */
+.btn {
+  border-radius: 12px !important;
+  padding: 10px 20px !important;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: none !important;
+  transition: var(--transition);
+}
+.btn-primary {
+  background: var(--primary-color) !important;
+  border: none !important;
+}
+.btn-primary:hover {
+  background: #3311db !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -5px rgba(67, 24, 255, 0.4) !important;
+}
+
+/* 8. NAVBAR SUPERIOR */
+.main-header {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(20px);
+  border-bottom: none !important;
+}
+
+/* 9. MODIFICACIONES ESPECÍFICAS DE TU HTML */
+/* Ocultar el texto "GestorDAW" del sidebar si quieres que sea solo iconos o más limpio, si no, déjalo */
+.brand-link .brand-text {
+  color: var(--text-main) !important;
+}
+
+/* ==============================================
+   FIX MODO OSCURO (PREMIUM DARK)
+   ============================================== */
+body.dark-mode {
+  --bg-body: #0f172a; /* Fondo muy oscuro (Navy profundo) */
+  --text-main: #f1f5f9; /* Blanco casi puro */
+  --text-light: #94a3b8; /* Gris azulado claro */
+}
+
+/* Forzar fondos oscuros en componentes clave */
+body.dark-mode .main-sidebar,
+body.dark-mode .main-header,
+body.dark-mode .card,
+body.dark-mode .modal-content {
+  background-color: #1e293b !important; /* Gris azulado oscuro para tarjetas */
+  color: var(--text-main) !important;
+  border-color: #334155 !important;
+}
+
+/* Arreglar textos específicos en modo oscuro */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6,
+body.dark-mode .card-title,
+body.dark-mode .brand-text,
+body.dark-mode .nav-link {
+  color: #f1f5f9 !important;
+}
+
+/* Arreglar tablas en modo oscuro */
+body.dark-mode .table thead th {
+  color: #cbd5e1 !important;
+  border-bottom: 1px solid #334155 !important;
+}
+body.dark-mode .table tbody td {
+  color: #e2e8f0 !important;
+  border-top: 1px solid #334155 !important;
+}
+body.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+body.dark-mode .table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Sidebar links in dark mode */
+body.dark-mode .nav-sidebar .nav-item .nav-link:not(.active):hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+/* =======================================================
+   FIX: BOTONES DE EXPORTAR (DATATABLES)
+   Más pequeños y separados
+   ======================================================= */
+.dt-buttons .btn {
+  padding: 6px 14px !important; /* Mucho menos relleno que los botones normales */
+  font-size: 0.85rem !important; /* Letra un poco más pequeña */
+  margin-right: 8px !important; /* Separación a la derecha */
+  margin-bottom: 15px !important; /* Separación por abajo (para no pegarse a la búsqueda) */
+  border-radius: 8px !important; /* Bordes un pelín menos redondos */
+  min-width: auto !important; /* Que se ajusten al contenido */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Sombra suave */
+}
+
+/* Alineación de la barra de búsqueda y botones */
+.dataTables_wrapper .row:first-child {
+  align-items: center; /* Centrar verticalmente botones y buscador */
+  margin-bottom: 10px;
+}
+
+/* =======================================================
+   FIX: INPUTS DE TEXTO EN MODO OSCURO (NUCLEAR)
+   ======================================================= */
+body.dark-mode .form-control,
+body.dark-mode .form-select,
+body.dark-mode .custom-select,
+body.dark-mode textarea,
+body.dark-mode input[type="text"],
+body.dark-mode input[type="email"],
+body.dark-mode input[type="password"],
+body.dark-mode input[type="date"],
+body.dark-mode input[type="search"],
+body.dark-mode input[type="number"] {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #475569 !important;
+}
+
+/* FIX CRÍTICO: Autocompletado de Chrome/Edge en modo oscuro */
+body.dark-mode input:-webkit-autofill,
+body.dark-mode input:-webkit-autofill:hover, 
+body.dark-mode input:-webkit-autofill:focus, 
+body.dark-mode input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px #1e293b inset !important;
+    -webkit-text-fill-color: #f1f5f9 !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+body.dark-mode .form-control:focus,
+body.dark-mode .form-select:focus,
+body.dark-mode .custom-select:focus,
+body.dark-mode textarea:focus {
+  background-color: #1e293b !important;
+  border-color: var(--primary-color) !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 0 0 0.2rem rgba(67, 24, 255, 0.4) !important;
+}
+
+body.dark-mode .form-control::placeholder,
+body.dark-mode input::placeholder {
+  color: #94a3b8 !important; /* Más claro para que se lea mejor */
+  opacity: 1;
+}
+
+/* Iconos al lado de los inputs (sobre, candado, etc) */
+body.dark-mode .input-group-text {
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+  color: #f1f5f9 !important; /* Blanco brillante */
+}
+
+/* Arreglar bordes de los grupos de input para que no se vean dobles o feos */
+body.dark-mode .input-group .form-control {
+    border-right-color: transparent;
+}
+body.dark-mode .input-group .input-group-append .input-group-text {
+    border-left-color: #475569 !important;
+}

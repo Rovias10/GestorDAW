@@ -12,5 +12,8 @@ router.post("/:id/invite", projectController.addCollaborator);
 
 const taskController = require("../src/taskController");
 router.post("/:id/tasks", taskController.createTask);
+router.get("/:id/messages", projectController.getChatMessages);
 
+router.get("/:id/activity", taskController.getProjectActivity);
+module.exports = router;
 module.exports = router;
