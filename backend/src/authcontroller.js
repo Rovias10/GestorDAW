@@ -67,7 +67,7 @@ exports.register = async (req, res) => {
       [name, email, hashedPassword, verificationToken, 0]
     );
 
-    const verifyLink = `http://34.175.158.17:3000/frontend-sin-simular/pages/auth/verify.html?token=${verificationToken}`;
+    const verifyLink = `http://gestordaw.ddns.net/pages/auth/verify.html?token=${verificationToken}`;
 
     try {
       console.log(`Enviando correo de verificación a ${email}...`);
@@ -148,7 +148,7 @@ exports.forgotPassword = async (req, res) => {
       "UPDATE users SET reset_password_token = ?, reset_password_expires = ? WHERE id = ?",
       [token, expireDate, user.id]
     );
-    const resetUrl = `http://34.175.158.17:3000/frontend-sin-simular/pages/auth/reset-password.html?token=${token}`;
+    const resetUrl = `http://gestordaw.ddns.net/pages/auth/reset-password.html?token=${token}`;
     await sendEmail(
       email,
       "Recuperación de Contraseña - GestorDAW",

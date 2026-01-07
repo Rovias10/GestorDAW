@@ -1,4 +1,4 @@
-const API_URL = "http://34.175.158.17:3000/api";
+const API_URL = "http://gestordaw.ddns.net/api";
 
 export function guardarToken(token) {
   localStorage.setItem("jwt", token);

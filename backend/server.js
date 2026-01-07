@@ -22,7 +22,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/stats", statsRoutes);
 
-app.use(express.static(path.join(__dirname, "../frontend-sin-simular")));
+app.use(express.static(path.join(__dirname, "public")));
 
 const server = http.createServer(app);
 const io = new Server(server, {
