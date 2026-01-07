@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Proyectos | Gestor de Proyectos</title>
+    <title>Mi Perfil | Gestor de Proyectos</title>
     <!-- Google Font: Source Sans Pro -->
     <link
       rel="stylesheet"
@@ -31,16 +31,6 @@
     />
 
     <link rel="stylesheet" href="../../assets/css/modern-theme.css" />
-    <style>
-      .project-card {
-        cursor: pointer;
-        transition: transform 0.2s;
-      }
-      .project-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      }
-    </style>
   </head>
   <body class="hold-transition sidebar-mini">
     <!-- Auth Guard -->
@@ -115,7 +105,7 @@
               data-accordion="false"
             >
               <li class="nav-item">
-                <a href="index.html" class="nav-link">
+                <a href="../dashboard/index.html" class="nav-link">
                   <i class="nav-icon fas fa-tachometer-alt"></i>
                   <p>Dashboard</p>
                 </a>
@@ -127,13 +117,13 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="chat.html" class="nav-link">
+                <a href="../dashboard/chat.html" class="nav-link">
                   <i class="nav-icon fas fa-comments"></i>
                   <p>Chat Global</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="calendar.html" class="nav-link">
+                <a href="../dashboard/calendar.html" class="nav-link">
                   <i class="nav-icon fas fa-calendar-alt"></i>
                   <p>Calendario</p>
                 </a>
@@ -152,27 +142,82 @@
       <!-- Contenido Principal -->
       <div class="content-wrapper">
         <div class="content-header">
-          <div class="container-fluid">
-            <div class="row mb-2">
-              <div class="col-sm-6"><h1 class="m-0">Mis Proyectos</h1></div>
-              <div class="col-sm-6">
-                <button
-                  id="createProjectButton"
-                  class="btn btn-primary float-sm-right"
-                  data-toggle="modal"
-                  data-target="#projectModal"
-                >
-                  <i class="fas fa-plus"></i> Crear Nuevo Proyecto
-                </button>
-              </div>
-            </div>
-          </div>
+          <div class="container-fluid"><h1 class="m-0">Mi Perfil</h1></div>
         </div>
         <section class="content">
           <div class="container-fluid">
-            <!-- Rejilla de Proyectos (Nivel 2) -->
-            <div id="projectsGrid" class="row">
-              <!-- Las tarjetas de proyecto se insertarán aquí -->
+            <div class="row">
+              <div class="col-md-4">
+                <!-- Tarjeta de Perfil -->
+                <div class="card card-primary card-outline">
+                  <div class="card-body box-profile">
+                    <div class="text-center">
+                      <img
+                        id="profileAvatar"
+                        class="profile-user-img img-fluid img-circle"
+                        src="https://placehold.co/128x128"
+                        alt="Avatar"
+                      />
+                    </div>
+                    <h3 class="profile-username text-center" id="profileName">
+                      Cargando...
+                    </h3>
+                    <p class="text-muted text-center" id="profileEmail">
+                      Cargando...
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-8">
+                <!-- Formulario de Edición -->
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">Editar Información</h3>
+                  </div>
+                  <div class="card-body">
+                    <form id="profileForm" class="form-horizontal">
+                      <div class="form-group row">
+                        <label for="inputName" class="col-sm-2 col-form-label"
+                          >Nombre</label
+                        >
+                        <div class="col-sm-10">
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="inputName"
+                            placeholder="Nombre"
+                          />
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label for="inputAvatar" class="col-sm-2 col-form-label"
+                          >URL de Avatar</label
+                        >
+                        <div class="col-sm-10">
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="inputAvatar"
+                            placeholder="https://ejemplo.com/imagen.png"
+                          />
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <div class="offset-sm-2 col-sm-10">
+                          <button type="submit" class="btn btn-danger">
+                            Guardar Cambios
+                          </button>
+                        </div>
+                      </div>
+                      <div
+                        id="profileError"
+                        class="text-danger mt-2"
+                        style="display: none"
+                      ></div>
+                    </form>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -186,63 +231,6 @@
       </footer>
     </div>
     <!-- ./wrapper -->
-
-    <!-- Modal para Crear/Editar Proyecto -->
-    <div class="modal fade" id="projectModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="projectModalTitle">Crear Proyecto</h5>
-            <button type="button" class="close" data-dismiss="modal">
-              &times;
-            </button>
-          </div>
-          <div class="modal-body">
-            <form id="projectForm">
-              <input type="hidden" id="projectId" />
-              <div class="form-group">
-                <label for="projectName">Nombre del Proyecto</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="projectName"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label for="projectDescription">Descripción</label>
-                <textarea
-                  class="form-control"
-                  id="projectDescription"
-                  rows="3"
-                ></textarea>
-              </div>
-              <div
-                id="projectError"
-                class="text-danger mt-2"
-                style="display: none"
-              ></div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              id="saveProjectButton"
-            >
-              Guardar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- jQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>

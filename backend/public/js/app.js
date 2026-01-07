@@ -19,6 +19,8 @@ if (localStorage.getItem("darkMode") === "enabled") {
   updateDarkModeIcon(true); 
 }
 
+// Reveal body (handled by CSS now)
+
 if (toggleBtn) {
   toggleBtn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -79,6 +81,9 @@ if (document.getElementById("loginForm")) {
       const res = await api.login(email, password);
       if (res.token) {
         api.guardarToken(res.token);
+        if (res.user) {
+            localStorage.setItem("user", JSON.stringify(res.user));
+        }
         window.location.href = "../dashboard/index.html";
       }
     } catch (error) {
@@ -190,6 +195,7 @@ if (document.getElementById("projectsGrid")) {
         const card = document.createElement("div");
         const total = proj.total_tasks || 0;
         const completed = proj.completed_tasks || 0;
+        const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
         let barColor = "bg-primary";
         if (percent === 100) barColor = "bg-success";
@@ -240,21 +246,68 @@ if (document.getElementById("projectsGrid")) {
     }
   }
 
-  document.getElementById("saveProjectButton").onclick = async () => {
+  const handleSaveProject = async (e) => {
+    e.preventDefault(); // Evitamos recarga si se dispara por submit
     const name = document.getElementById("projectName").value;
     const description = document.getElementById("projectDescription").value;
     const errorEl = document.getElementById("projectError");
 
+    // Limpiar errores previos
+    errorEl.style.display = 'none';
+    errorEl.textContent = '';
+
+    // Validacion basica
+    if (!name.trim()) {
+        errorEl.textContent = "El nombre del proyecto es obligatorio";
+        errorEl.style.display = "block";
+        return;
+    }
+
+    // Feedback visual (opcional)
+    const btn = document.getElementById("saveProjectButton");
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Guardando...";
+
     try {
       await api.createProject(name, description);
-      cargarProyectos();
-      $("#projectModal").modal("hide");
+      
+      // Limpiar formulario y cerrar modal
       document.getElementById("projectForm").reset();
+      $("#projectModal").modal("hide");
+      
+      // Recargar lista
+      await cargarProyectos();
+      
+      Swal.fire({
+        icon: 'success',
+        title: '¡Proyecto creado!',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000
+      });
+
     } catch (error) {
-      errorEl.textContent = error.message || "Error al guardar";
+      console.error(error);
+      errorEl.textContent = error.message || "Error al guardar el proyecto";
       errorEl.style.display = "block";
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
     }
   };
+
+  // Escuchar el evento susbmit del formulario para capturar Enter
+  const projForm = document.getElementById("projectForm");
+  if(projForm) {
+      projForm.addEventListener("submit", handleSaveProject);
+  }
+
+  // Mantener el click del botón por si acaso (aunque con type=submit y form listener sobra, es seguro mantenerlo si no duplica)
+  // Pero al cambiar el botón a type="submit", el click dispara el submit del form.
+  // Así que NO añadimos listener directo al botón para evitar doble llamada.
+
 
   cargarProyectos();
 }
@@ -263,7 +316,8 @@ if (document.getElementById("projectDetailName")) {
   let currentProject = null;
   let tasksTable = null;
   const urlParams = new URLSearchParams(window.location.search);
-  const projectId = urlParams.get("id");
+  let projectId = urlParams.get("id");
+  console.log("Debug: projectId from URL is", projectId);
 
   if (!projectId) {
     window.location.href = "projects.html";
@@ -354,7 +408,7 @@ if (document.getElementById("projectDetailName")) {
               return `
                     <div class="btn-group">
                         <button type="button" class="btn btn-default btn-xs disabled"><b>${h}:${m}</b></button>
-                        <button type="button" class="btn btn-xs ${btnClass} btn-timer" data-id="${row.id}">
+                        <button type="button" class="btn btn-xs ${btnClass} btn-timer" data-id="${row.id}" onclick="event.stopPropagation(); window.handleTaskTimer('${row.id}')">
                             <i class="fas ${icon}"></i>
                         </button>
                     </div>
@@ -398,15 +452,31 @@ if (document.getElementById("projectDetailName")) {
 
       const btnChat = document.getElementById("btnOpenChat");
       if (btnChat) {
-        btnChat.href = `chat.html?projectId=${project.id}`;
+        btnChat.href = `chat.html?projectId=${projectId}`;
       }
     } catch (error) {
       console.error("Error cargando detalle:", error);
+      let title = "Error";
+      let text = "No se pudo cargar el proyecto.";
+
+      if (error.status === 403 || (error.message && error.message.includes("403"))) {
+          title = "Acceso Denegado";
+          text = "No tienes permiso para ver este proyecto.";
+      } else if (error.status === 404 || (error.message && error.message.includes("404"))) {
+          title = "No Encontrado";
+          text = "El proyecto no existe o fue eliminado.";
+      } else {
+         text = error.message || text;
+      }
+
       Swal.fire({
         icon: "error",
-        title: "Ups...",
-        text: "No se pudo cargar el proyecto. Tal vez fue borrado o no tienes permisos.",
-        footer: '<a href="projects.html">Volver a la lista</a>',
+        title: title,
+        text: text,
+        footer: '<a href="projects.html" class="btn btn-primary">Volver a mis proyectos</a>',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false
       });
     }
 
@@ -429,17 +499,14 @@ if (document.getElementById("projectDetailName")) {
       const events = currentProject.tasks
         .map((task) => {
           if (!task.due_date) return null;
-
-          let color = "#3b82f6";
-          if (task.priority === "high") color = "#f59e0b";
-          if (task.priority === "critical") color = "#ef4444";
-          if (task.status === "completed") color = "#10b981";
-
           return {
             title: task.title,
             start: task.due_date,
-            color: color,
-            extendedProps: { description: task.description },
+            extendedProps: { 
+                description: task.description,
+                priority: task.priority,
+                status: task.status
+            },
           };
         })
         .filter((e) => e !== null);
@@ -454,13 +521,69 @@ if (document.getElementById("projectDetailName")) {
         },
         events: events,
         height: 650,
-        eventClick: function (info) {
-          Swal.fire({
-            title: info.event.title,
-            text: info.event.extendedProps.description || "Sin descripción",
-            icon: "info",
-          });
-        },
+        eventContent: function(arg) {
+            const props = arg.event.extendedProps;
+            let icon = 'fa-circle';
+            // Background Colors based on Priority (Pastel/Light versions)
+            let bgStyle = 'background-color: #e7f1ff; border-left: 4px solid #007bff;'; // Default Blue
+            
+            if (props.priority === 'high') {
+                icon = 'fa-arrow-up text-warning';
+                bgStyle = 'background-color: #fff3cd; border-left: 4px solid #ffc107;'; // Light Yellow/Orange
+            }
+            if (props.priority === 'critical') {
+                icon = 'fa-radiation text-danger';
+                bgStyle = 'background-color: #ffe2e5; border-left: 4px solid #dc3545;'; // Light Red
+            }
+            
+            // Status Indicator & Overrides
+            let statusClass = '';
+            if (props.status === 'completed') {
+                statusClass = 'text-decoration-line-through opacity-50';
+                bgStyle = 'background-color: #d1e7dd; border-left: 4px solid #198754;'; // Light Green
+            }
+
+            return {
+              html: `
+                <div class="fc-content shadow-sm rounded p-1 mb-1 text-dark" style="${bgStyle} overflow: hidden; font-size: 0.8em; line-height: 1.2;">
+                    <div class="${statusClass} font-weight-bold text-truncate">
+                        <i class="fas ${icon} mr-1" style="font-size: 0.9em;"></i>${arg.event.title}
+                    </div>
+                </div>
+              `
+            };
+          },
+        eventClick: function(info) {
+             const props = info.event.extendedProps;
+             const statusMap = {
+                'pending': '<span class="badge badge-danger">Pendiente</span>',
+                'in_progress': '<span class="badge badge-primary">En Progreso</span>',
+                'completed': '<span class="badge badge-success">Completada</span>'
+            };
+            
+            const priorityMap = {
+                'low': 'Baja 🟢',
+                'medium': 'Media 🟡',
+                'high': 'Alta 🟠',
+                'critical': 'Crítica 🔴'
+            };
+             
+             Swal.fire({
+                title: info.event.title,
+                html: `
+                <div class="text-left mt-3">
+                    <div class="row mb-2">
+                        <div class="col-6"><strong>Estado:</strong><br> ${statusMap[props.status] || props.status}</div>
+                        <div class="col-6"><strong>Prioridad:</strong><br> ${priorityMap[props.priority] || props.priority}</div>
+                    </div>
+                    <p class="mb-1"><strong>Fecha Límite:</strong> <span class="text-primary">${info.event.start.toLocaleDateString()}</span></p>
+                    <hr>
+                    <p class="text-muted mb-1"><small>DESCRIPCIÓN</small></p>
+                    <div class="p-2 bg-light rounded border">${props.description || '<i>Sin descripción</i>'}</div>
+                </div>
+              `,
+             });
+        }
       });
       calendar.render();
     }
@@ -568,15 +691,11 @@ if (document.getElementById("projectDetailName")) {
     }
   });
 
-  $("#tasksTable tbody").on("click", ".btn-timer", async function () {
-    const taskId = $(this).data("id");
+  // Expose global function for the onclick handler in the table
+  window.handleTaskTimer = async function(taskId) {
+      // Prevents double click logic if handled by listener too, but onclick is cleaner for dynamic tables
     try {
-      const token = localStorage.getItem("jwt");
-
-      await fetch(`http://localhost:3000/api/tasks/${taskId}/timer`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.toggleTaskTimer(taskId);
 
       cargarDetalleProyecto();
       cargarActividad();
@@ -584,8 +703,11 @@ if (document.getElementById("projectDetailName")) {
       console.error(error);
       Swal.fire("Error", "No se pudo actualizar el tiempo", "error");
     }
-  });
+  };
 
+  // REMOVED OLD JQUERY LISTENER to avoid double bindings or issues with datatables re-renders.
+  // The button now has onclick="window.handleTaskTimer(...)"
+  
   $("#createTaskButton").on("click", () => {
     document.getElementById("taskForm").reset();
     document.getElementById("taskId").value = "";
@@ -636,106 +758,23 @@ if (document.getElementById("projectDetailName")) {
     }
   };
 
-  const socket = io("http://localhost:3000");
-  const chatContainer = document.getElementById("chatContainer");
-  const chatForm = document.getElementById("chatForm");
-  const chatInput = document.getElementById("chatInput");
-
-  socket.emit("join_project", projectId);
-
-  function appendMessage(msgData, isMe) {
-    const time = new Date(msgData.created_at).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    const name = msgData.name || msgData.userName || "Usuario";
-    const text = msgData.message;
-
-    const alignClass = isMe ? "right" : "left";
-    const nameFloat = isMe ? "float-right" : "float-left";
-    const timeFloat = isMe ? "float-left" : "float-right";
-
-    const html = `
-        <div class="direct-chat-msg ${alignClass}">
-            <div class="direct-chat-infos clearfix">
-                <span class="direct-chat-name ${nameFloat}">${name}</span>
-                <span class="direct-chat-timestamp ${timeFloat}">${time}</span>
-            </div>
-            <img class="direct-chat-img" src="https://placehold.co/128x128?text=${name.charAt(
-              0
-            )}" alt="User">
-            <div class="direct-chat-text">
-                ${text}
-            </div>
-        </div>
-    `;
-
-    chatContainer.insertAdjacentHTML("beforeend", html);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+  // --- CHAT REMOVED FROM DETAIL PAGE ---
+  // The user navigates to a separate chat.html page now.
+  // We remove the embedded socket logic here to prevent crashes looking for non-existent elements.
+  const btnChat = document.getElementById("btnOpenChat");
+  if (btnChat) {
+      btnChat.href = `chat.html?projectId=${projectId}`;
   }
 
-  async function cargarChatHistory() {
-    try {
-      const token = localStorage.getItem("jwt");
-      const res = await fetch(
-        `http://localhost:3000/api/projects/${projectId}/messages`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const messages = await res.json();
-
-      chatContainer.innerHTML = "";
-      const myData = api.decodificarToken();
-
-      messages.forEach((msg) => {
-        const isMe = msg.user_id === myData.id;
-        appendMessage(msg, isMe);
-      });
-    } catch (error) {
-      console.error("Error cargando chat:", error);
-    }
-  }
-  cargarChatHistory();
-
-  chatForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const text = chatInput.value;
-    if (!text.trim()) return;
-
-    const myData = api.decodificarToken();
-
-    socket.emit("send_message", {
-      projectId: projectId,
-      userId: myData.id,
-      userName: myData.name,
-      message: text,
-    });
-
-    chatInput.value = "";
-  });
-
-  socket.on("receive_message", (data) => {
-    const myData = api.decodificarToken();
-    const isMe = data.userId === myData.id;
-
-    appendMessage(data, isMe);
-  });
   async function cargarActividad() {
     const list = document.getElementById("activityList");
     if (!list) return;
 
     try {
-      const token = localStorage.getItem("jwt");
-      const res = await fetch(
-        `http://localhost:3000/api/projects/${projectId}/activity`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const acts = await res.json();
+      const res = await api.getProjectActivity(projectId);
+      const acts = res; // api service returns parsed json directly
 
-      if (acts.length === 0) {
+      if (!acts || acts.length === 0) {
         list.innerHTML =
           '<p class="text-center text-muted p-3">No hay actividad reciente.</p>';
         return;
@@ -774,48 +813,65 @@ if (document.getElementById("projectDetailName")) {
   const nameEl = document.getElementById("userNameSmall");
   const myName = nameEl ? nameEl.textContent.trim() : "";
 
-  $(".filter-btn").on("click", function () {
+  // Evento para los filtros de tareas (Fixed)
+  $(document).on("click", ".filter-btn", function () {
+    const fType = $(this).data("filter");
+
+    // Actualizar clases de botones
     $(".filter-btn").each(function () {
-      const fType = $(this).data("filter");
-      const classMap = {
-        all: "btn-outline-secondary",
-        mine: "btn-outline-primary",
-        urgent: "btn-outline-warning",
-        completed: "btn-outline-success",
-        pending: "btn-outline-danger",
-      };
-      const baseClass = classMap[fType] || "btn-outline-secondary";
-
-      $(this).removeClass("active btn-secondary").addClass(baseClass);
+        $(this).removeClass("active btn-primary btn-warning btn-success btn-danger btn-secondary btn-outline-primary btn-outline-warning btn-outline-success btn-outline-danger btn-outline-secondary");
+        
+        const type = $(this).data("filter");
+        const outlineMap = {
+            all: "btn-outline-secondary",
+            mine: "btn-outline-primary",
+            urgent: "btn-outline-warning",
+            completed: "btn-outline-success",
+            pending: "btn-outline-danger"
+        };
+        $(this).addClass(outlineMap[type]);
     });
-    const myFilter = $(this).data("filter");
-    const myClassMap = {
-      all: "btn-outline-secondary",
-      mine: "btn-outline-primary",
-      urgent: "btn-outline-warning",
-      completed: "btn-outline-success",
-      pending: "btn-outline-danger",
+
+    // Activar el botón pulsado
+    const activeMap = {
+        all: "btn-secondary active",
+        mine: "btn-primary active",
+        urgent: "btn-warning active",
+        completed: "btn-success active",
+        pending: "btn-danger active"
     };
-    const myBaseClass = myClassMap[myFilter] || "btn-outline-secondary";
+    $(this).removeClass("btn-outline-primary btn-outline-warning btn-outline-success btn-outline-danger btn-outline-secondary")
+           .addClass(activeMap[fType]);
 
-    $(this).removeClass(myBaseClass).addClass("active btn-secondary");
 
-    const filter = $(this).data("filter");
-
+    // Filtrar tabla
     if (tasksTable) {
-      tasksTable.search("").columns().search("").draw();
+      tasksTable.search("").columns().search("").draw(); // Reset
 
-      if (filter === "mine") {
-        tasksTable.column(4).search(myName).draw();
-      } else if (filter === "urgent") {
-        tasksTable.column(2).search("Alta|Crítica", true, false).draw();
-      } else if (filter === "completed") {
-        tasksTable.column(5).search("Completada").draw();
-      } else if (filter === "pending") {
-        tasksTable.column(5).search("Pendiente|Progreso", true, false).draw();
+      if (fType === "mine") {
+        // Filtrar por nombre de usuario (columna 4 asumida)
+        tasksTable.column(4).search(myName).draw(); 
+      } else if (fType === "urgent") {
+         // Filtrar por prioridad Alta o Crítica (columna 2)
+         // Usamos regex
+         tasksTable.column(2).search("Alta|Crítica", true, false).draw();
+      } else if (fType === "completed") {
+         // Estado completado (columna 5)
+         tasksTable.column(5).search("Completada").draw();
+      } else if (fType === "pending") {
+         // Pendiente o Progreso
+         tasksTable.column(5).search("Pendiente|Progreso", true, false).draw();
       }
     }
   });
+
+  // Cargar actividad al cambiar a la tab
+  $('a[data-toggle="pill"]').on("shown.bs.tab", function (e) {
+      if (e.target.getAttribute("href") === "#activity") {
+          cargarActividad();
+      }
+  });
+
 
   const viewBtn = document.getElementById("viewToggleBtn");
   const tableView = document.querySelector(".card-outline-tabs");
@@ -878,36 +934,72 @@ if (document.getElementById("projectDetailName")) {
     new Sortable(el, {
       group: "kanban",
       animation: 150,
-      onEnd: async function (evt) {
+        onEnd: async function (evt) {
         const itemEl = evt.item;
         const newStatus = evt.to.getAttribute("data-status");
         const oldStatus = evt.from.getAttribute("data-status");
         const taskId = itemEl.getAttribute("data-id");
 
         if (newStatus !== oldStatus) {
+            
+          // Optimistic UI update check (Sortable already moved it)
+          // We must update the server.
+
           try {
-            const token = localStorage.getItem("jwt");
-
+            // Find task in local state
             const task = currentProject.tasks.find((t) => t.id == taskId);
+            
+            if (!task) {
+                throw new Error("Tarea no encontrada en memoria local.");
+            }
 
-            await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
+            // Fix Date Format: Backend expects YYYY-MM-DD usually, but task.due_date might be ISO
+            let cleanDate = task.due_date;
+            if (cleanDate && typeof cleanDate === 'string' && cleanDate.includes('T')) {
+                cleanDate = cleanDate.split('T')[0];
+            }
+
+            // Fix User ID: Use whatever field holds the ID
+            const userId = task.assigned_to_user_id || task.user_id;
+
+            const payload = {
                 title: task.title,
                 description: task.description,
                 priority: task.priority,
-                due_date: task.due_date,
+                due_date: cleanDate, 
                 status: newStatus,
-                assigned_to_user_id: task.user_id,
-              }),
-            });
+                assigned_to_user_id: userId
+            };
+            
+            console.log("Updating Kanban Task:", payload);
 
+            await api.updateTask(taskId, payload);
+
+            // Update local state
             task.status = newStatus;
+            
+            // Refresh Activity Log
             cargarActividad();
+            
+            // --- CRITICAL FIX: Refresh UI without reload ---
+            // 1. Re-render the Kanban to ensure the card's internal state is clean (optional but good)
+            renderKanban(); 
+            
+            // 2. If we ever switch back to List view, we need that data updated too. 
+            // Calling loading details will refresh everything including the table.
+            // However, full reload might reset the view to "List". 
+            // We just want to refresh the DATA.
+            
+            // Let's manually update the local Tasks Table instance if exists
+            if (tasksTable) {
+                 // Find the row and update the status data cell
+                 const row = tasksTable.row((idx, data) => data.id == taskId);
+                 if (row.length) {
+                     const d = row.data();
+                     d.status = newStatus;
+                     row.data(d).draw(false); // Update row without paging reset
+                 }
+            }
 
             const Toast = Swal.mixin({
               toast: true,
@@ -916,9 +1008,18 @@ if (document.getElementById("projectDetailName")) {
               timer: 3000,
             });
             Toast.fire({ icon: "success", title: "Estado actualizado" });
+            
           } catch (error) {
-            console.error(error);
-            Swal.fire("Error", "No se pudo mover la tarea", "error");
+            console.error("Kanban Error:", error);
+            
+            Swal.fire({
+                title: "Error al mover",
+                text: "No se guardó el cambio: " + (error.message || "Error de conexión"),
+                icon: "error"
+            }).then(() => {
+                 // Move failed, reload to reset positions logic
+                renderKanban(); // Re-render to snap back
+            });
           }
         }
       },
@@ -985,3 +1086,35 @@ if (document.getElementById("profileForm")) {
 
   cargarPerfil();
 }
+
+/* Sidebar Highlight Logic */
+setTimeout(() => {
+    const currentPath = window.location.pathname.toLowerCase();
+    const links = document.querySelectorAll(".nav-sidebar .nav-link");
+
+    links.forEach((link) => {
+        link.classList.remove("active");
+        
+        // Get absolute path from the link
+        const linkUrl = new URL(link.href, window.location.origin);
+        const linkPath = linkUrl.pathname.toLowerCase();
+
+        let shouldActive = false;
+
+        // 1. Exact match (covers Dashboard, Projects list, Chat, Calendar, Profile)
+        // Using endsWith to be safer with different absolute path roots if needed, 
+        // but exact match on pathname is usually correct for the same file.
+        if (currentPath === linkPath) {
+             shouldActive = true;
+        }
+
+        // 2. Special Case: Project Detail should highlight Projects link
+        if (currentPath.includes("project-detail.html") && linkPath.includes("projects.html")) {
+            shouldActive = true;
+        }
+
+        if (shouldActive) {
+            link.classList.add("active");
+        }
+    });
+}, 100);

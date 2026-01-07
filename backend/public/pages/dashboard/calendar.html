@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Calendario | GestorDAW</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css"
+    />
+    <link rel="stylesheet" href="../../assets/css/modern-theme.css">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+  </head>
+  <body class="hold-transition sidebar-mini">
+    <script type="module" src="../../js/auth-guard.js"></script>
+
+    <div class="wrapper">
+    <div class="wrapper">
+      <!-- Navbar -->
+      <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+          </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#" role="button" id="darkModeToggle">
+              <i class="fas fa-moon"></i>
+            </a>
+          </li>
+          <li class="nav-item dropdown user-menu">
+            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
+              <img src="https://placehold.co/160x160/007bff/ffffff?text=U" id="userAvatarSmall" class="user-image img-circle elevation-2" alt="User Image">
+              <span class="d-none d-md-inline" id="userNameSmall">Cargando...</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+              <li class="user-header bg-primary">
+                <img src="https://placehold.co/160x160/007bff/ffffff?text=U" id="userAvatarLarge" class="img-circle elevation-2" alt="User Image">
+                <p id="userNameLarge">Cargando...<small>Miembro del equipo</small></p>
+              </li>
+              <li class="user-footer">
+                <a href="../nuevo/profile.html" class="btn btn-default btn-flat">Perfil</a>
+
+                <a href="#" id="logoutBtn" class="btn btn-default btn-flat float-right">Cerrar Sesión</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.navbar -->
+
+      <!-- Main Sidebar Container -->
+      <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <a href="index.html" class="brand-link">
+          <span class="brand-text font-weight-light"><b>Gestor</b>DAW</span>
+        </a>
+
+        <div class="sidebar">
+          <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+              <li class="nav-item">
+                <a href="index.html" class="nav-link">
+                  <i class="nav-icon fas fa-tachometer-alt"></i>
+                  <p>Dashboard</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="../nuevo/projects.html" class="nav-link">
+
+                  <i class="nav-icon fas fa-folder"></i>
+                  <p>Proyectos</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="chat.html" class="nav-link">
+                  <i class="nav-icon fas fa-comments"></i>
+                  <p>Chat Global</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="calendar.html" class="nav-link active">
+                  <i class="nav-icon fas fa-calendar-alt"></i>
+                  <p>Calendario</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="../nuevo/profile.html" class="nav-link">
+
+                  <i class="nav-icon fas fa-user-cog"></i>
+                  <p>Mi Perfil</p>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </aside>
+
+      <div class="content-wrapper">
+
+        <section class="content-header">
+          <div class="container-fluid">
+            <h1>Calendario de Tareas</h1>
+          </div>
+        </section>
+
+        <section class="content">
+          <div class="container-fluid">
+            <div class="card card-primary">
+              <div class="card-body p-0">
+                <div id="calendar"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
+    <script type="module" src="../../js/app.js"></script>
+
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+      import * as apiService from '../../js/api-service.js';
+
+      document.addEventListener("DOMContentLoaded", async function () {
+
+        const calendarEl = document.getElementById("calendar");
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: "dayGridMonth",
+          locale: "es",
+          themeSystem: "bootstrap",
+          headerToolbar: {
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,listWeek",
+          },
+          eventContent: function(arg) {
+            const props = arg.event.extendedProps;
+            let icon = 'fa-circle';
+            // Background Colors based on Priority (Pastel/Light versions)
+            let bgStyle = 'background-color: #e7f1ff; border-left: 4px solid #007bff;'; // Default Blue
+            
+            if (props.priority === 'high') {
+                icon = 'fa-arrow-up text-warning';
+                bgStyle = 'background-color: #fff3cd; border-left: 4px solid #ffc107;'; // Light Yellow/Orange
+            }
+            if (props.priority === 'critical') {
+                icon = 'fa-radiation text-danger';
+                bgStyle = 'background-color: #ffe2e5; border-left: 4px solid #dc3545;'; // Light Red
+            }
+            
+            // Status Indicator & Overrides
+            let statusClass = '';
+            if (props.status === 'completed') {
+                statusClass = 'text-decoration-line-through opacity-50';
+                bgStyle = 'background-color: #d1e7dd; border-left: 4px solid #198754;'; // Light Green
+            }
+
+            return {
+              html: `
+                <div class="fc-content shadow-sm rounded p-1 mb-1 text-dark" style="${bgStyle} overflow: hidden; font-size: 0.8em; line-height: 1.2;">
+                    <div class="${statusClass} font-weight-bold text-truncate">
+                        <i class="fas ${icon} mr-1" style="font-size: 0.9em;"></i>${arg.event.title}
+                    </div>
+                    <div class="mt-1 text-muted text-truncate" style="color: #495057 !important;">
+                        <i class="fas fa-user-circle mr-1" style="opacity: 0.7;"></i>${props.assignee_name || 'Sin Asignar'}
+                    </div>
+                </div>
+              `
+            };
+          },
+          eventClick: function(info) {
+             // ... existing eventClick code (kept the same logic, just ensuring data flows) ...
+             info.jsEvent.preventDefault();
+            
+            const props = info.event.extendedProps;
+            const statusMap = {
+                'pending': '<span class="badge badge-danger">Pendiente</span>',
+                'in_progress': '<span class="badge badge-primary">En Progreso</span>',
+                'completed': '<span class="badge badge-success">Completada</span>'
+            };
+            
+            const priorityMap = {
+                'low': 'Baja 🟢',
+                'medium': 'Media 🟡',
+                'high': 'Alta 🟠',
+                'critical': 'Crítica 🔴'
+            };
+
+            const assignee = props.assignee_name ? 
+                `<span class="badge badge-light border"><i class="fas fa-user text-primary mr-1"></i> ${props.assignee_name}</span>` : 
+                '<span class="text-muted font-italic">Sin asignar</span>';
+
+            Swal.fire({
+              title: info.event.title,
+              html: `
+                <div class="text-left mt-3">
+                    <div class="mb-3 p-2 bg-light rounded d-flex align-items-center justify-content-between">
+                        <div><small class="text-muted d-block uppercase" style="font-size:0.7rem; letter-spacing:1px;">ASIGNADO A</small> ${assignee}</div>
+                         <div class="text-right"><small class="text-muted d-block uppercase" style="font-size:0.7rem; letter-spacing:1px;">FECHA LÍMITE</small> <strong>${info.event.start.toLocaleDateString()}</strong></div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <small class="text-muted d-block uppercase" style="font-size:0.7rem; letter-spacing:1px; margin-bottom:4px;">ESTADO</small>
+                            ${statusMap[props.status] || props.status}
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block uppercase" style="font-size:0.7rem; letter-spacing:1px; margin-bottom:4px;">PRIORIDAD</small>
+                            ${priorityMap[props.priority] || props.priority}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <small class="text-muted d-block uppercase" style="font-size:0.7rem; letter-spacing:1px; margin-bottom:5px;">DESCRIPCIÓN</small>
+                        <div class="p-3 bg-white rounded border" style="background: #fdfdfd;">${props.description || '<i class="text-muted">Sin descripción detallada.</i>'}</div>
+                    </div>
+                </div>
+              `,
+              showCancelButton: true,
+              confirmButtonText: '<i class="fas fa-external-link-alt"></i> Ver Proyecto',
+              cancelButtonText: 'Cerrar',
+              confirmButtonColor: '#4318ff',
+              cancelButtonColor: '#6c757d',
+              width: '600px',
+              padding: '2em'
+            }).then((result) => {
+              if (result.isConfirmed && info.event.url) {
+                window.location.href = info.event.url;
+              }
+            });
+          },
+          events: async function (info, successCallback, failureCallback) {
+            try {
+              const tasks = await apiService.fetch("/tasks/my-tasks");
+              
+              // Get Current User info for Fallback
+              const tokenData = apiService.decodificarToken();
+              let myName = "Mi usuario";
+              let myId = null;
+              
+              if(tokenData) {
+                  myName = tokenData.name || tokenData.email;
+                  myId = tokenData.id;
+              }
+
+              const events = tasks.map((t) => {
+                // Determine Assignee Name
+                let assigneeName = t.assignee_name; // First choice: API
+                
+                // Fallback: Check if it's assigned to ME
+                // Checking both common field names and using loose equality (==) for string/number mismatch
+                if (!assigneeName) {
+                    const taskUserId = t.assigned_to_user_id || t.user_id; // Check both possible fields
+                    
+                    if (myId && taskUserId && taskUserId == myId) {
+                         assigneeName = myName + " (Yo)";
+                    }
+                }
+
+                // If still nothing
+                if (!assigneeName) assigneeName = "Sin Asignar";
+
+                let color = "transparent"; // We render custom HTML
+
+                return {
+                    title: t.title,
+                    start: t.due_date,
+                    url: `../nuevo/project-detail.html?id=${t.project_id}`,
+                    color: color, 
+                    extendedProps: {
+                        description: t.description,
+                        status: t.status,
+                        priority: t.priority,
+                        project_id: t.project_id,
+                        assignee_name: assigneeName 
+                    }
+                };
+              });
+              successCallback(events);
+            } catch (e) {
+              failureCallback(e);
+            }
+          },
+        });
+        calendar.render();
+      });
+    </script>
+  </body>
+</html>

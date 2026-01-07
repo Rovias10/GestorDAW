@@ -19,6 +19,8 @@ body {
   background-color: var(--bg-body) !important;
   color: var(--text-main) !important;
   -webkit-font-smoothing: antialiased;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 h1,

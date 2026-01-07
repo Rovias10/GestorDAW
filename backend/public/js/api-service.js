@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api";
+const API_URL = "http://34.175.158.17:3000/api";
 
 export function guardarToken(token) {
   localStorage.setItem("jwt", token);
@@ -59,7 +59,12 @@ async function fetchConAuth(url, options = {}) {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || `Error ${response.status}`);
+      // Mejorar mensaje de error
+      const msg = data.message || `Error ${response.status}`;
+      // Incluir status en el error para poder filtrar
+      const err = new Error(msg);
+      err.status = response.status;
+      throw err;
     }
 
     return data;
@@ -69,7 +74,8 @@ async function fetchConAuth(url, options = {}) {
   }
 }
 
-export const fetch = (endpoint, options) => fetchConAuth(`${API_URL}${endpoint}`, options);
+export const fetch = (endpoint, options) =>
+  fetchConAuth(`${API_URL}${endpoint}`, options);
 
 export async function login(email, password) {
   const response = await window.fetch(`${API_URL}/auth/login`, {
@@ -186,7 +192,7 @@ export function getMyTasks() {
 
 export function toggleTaskTimer(taskId) {
   return fetchConAuth(`${API_URL}/tasks/${taskId}/timer`, {
-    method: "POST"
+    method: "POST",
   });
 }
 
