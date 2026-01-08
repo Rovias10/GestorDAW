@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Verificar Cuenta | GestorDAW</title>
+    <link rel="icon" type="image/png" href="../../img/favicon.png">
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"
@@ -69,10 +70,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
 
-    <script type="module">
       import { verifyAccount } from "../../js/api-service.js";
       import "../../js/app.js";
 
+      // Dark Mode Check
+      if (localStorage.getItem("darkMode") === "enabled") {
+        document.body.classList.add("dark-mode");
+      }
 
       // 1. Si hay token en la URL, lo ponemos en el input
       const urlParams = new URLSearchParams(window.location.search);

@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Calendario | GestorDAW</title>
+    <link rel="icon" type="image/png" href="../../img/favicon.png">
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -241,7 +242,8 @@
           },
           events: async function (info, successCallback, failureCallback) {
             try {
-              const tasks = await apiService.fetch("/tasks/my-tasks");
+              // Cache bust to ensure fresh data
+              const tasks = await apiService.fetch(`/tasks/my-tasks?_=${new Date().getTime()}`);
               
               // Get Current User info for Fallback
               const tokenData = apiService.decodificarToken();
@@ -255,12 +257,12 @@
 
               const events = tasks.map((t) => {
                 // Determine Assignee Name
-                let assigneeName = t.assignee_name; // First choice: API
+                // Prioritize explicit name from DB, then email, then manual check
+                let assigneeName = t.assignee_name || t.assignee_email; 
                 
-                // Fallback: Check if it's assigned to ME
-                // Checking both common field names and using loose equality (==) for string/number mismatch
+                // Fallback: Check if it's assigned to ME (if DB didn't return name for some reason)
                 if (!assigneeName) {
-                    const taskUserId = t.assigned_to_user_id || t.user_id; // Check both possible fields
+                    const taskUserId = t.assigned_to_user_id || t.user_id; 
                     
                     if (myId && taskUserId && taskUserId == myId) {
                          assigneeName = myName + " (Yo)";

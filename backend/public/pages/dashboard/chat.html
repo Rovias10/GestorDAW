@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Chat | GestorDAW</title>
+    <link rel="icon" type="image/png" href="../../img/favicon.png">
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"
@@ -255,7 +256,8 @@
     <script type="module">
       import * as apiService from '../../js/api-service.js';
 
-      const socket = io("http://localhost:3000");
+      // Use relative connection to default to the serving origin (works for both localhost and ddns)
+      const socket = io(); 
       let currentProjectId = null;
       let currentUser = null;
 

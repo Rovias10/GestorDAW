@@ -201,14 +201,55 @@ exports.getProjectActivity = async (req, res) => {
 exports.getMyTasks = async (req, res) => {
   const userId = req.user.id;
   try {
-    const [tasks] = await db.query(
-      `SELECT t.*, p.name as project_name, p.id as project_id 
+    let isAdmin = false;
+    try {
+      // Intentar verificar rol global (si existe la columna)
+      const [userRows] = await db.query("SELECT role FROM users WHERE id = ?", [
+        userId,
+      ]);
+      if (userRows.length > 0 && userRows[0].role === "admin") {
+        isAdmin = true;
+      }
+    } catch (e) {
+      // Si falla (ej. no existe columna role), asumimos no admin
+    }
+
+    // Use subqueries to guarantee we get the user data if the ID exists
+    let query = `
+       SELECT 
+          t.id, t.title, t.description, t.priority, t.status, t.due_date, t.created_at, t.user_id, t.project_id,
+          p.name as project_name, 
+          (SELECT COALESCE(name, 'Usuario Desconocido') FROM users WHERE id = t.user_id) as assignee_name,
+          (SELECT COALESCE(email, 'sin-email') FROM users WHERE id = t.user_id) as assignee_email
        FROM task t
        JOIN projects p ON t.project_id = p.id
-       WHERE t.user_id = ? OR p.owner_id = ?
-       ORDER BY t.due_date ASC`,
-      [userId, userId]
-    );
+    `;
+
+    const params = [];
+
+    if (!isAdmin) {
+      // Si no es admin global, filtramos por acceso al proyecto
+      query += ` LEFT JOIN project_collaborators pc ON p.id = pc.project_id AND pc.user_id = ? `;
+      params.push(userId);
+
+      query += ` WHERE t.user_id = ? OR p.owner_id = ? OR pc.user_id IS NOT NULL `;
+      params.push(userId, userId);
+    }
+
+    query += ` ORDER BY t.due_date ASC`;
+
+    const [tasks] = await db.query(query, params);
+    
+    // Debug output to server console
+    console.log(`[DEBUG] getMyTasks: Found ${tasks.length} tasks.`);
+    if (tasks.length > 0) {
+        const withUser = tasks.filter(t => t.user_id);
+        console.log(`[DEBUG] Tasks with active user_id: ${withUser.length}`);
+        if(withUser.length > 0) {
+            console.log(`[DEBUG] Sample task: TaskID ${withUser[0].id} UserID ${withUser[0].user_id} -> Name: ${withUser[0].assignee_name}`);
+        }
+    }
+    
     res.json(tasks);
   } catch (error) {
     console.error(error);

@@ -193,6 +193,7 @@ if (document.getElementById("projectsGrid")) {
       }
       projects.forEach((proj) => {
         const card = document.createElement("div");
+        card.className = "col-lg-4 col-md-6 mb-4"; 
         const total = proj.total_tasks || 0;
         const completed = proj.completed_tasks || 0;
         const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
@@ -452,7 +453,7 @@ if (document.getElementById("projectDetailName")) {
 
       const btnChat = document.getElementById("btnOpenChat");
       if (btnChat) {
-        btnChat.href = `chat.html?projectId=${projectId}`;
+        btnChat.href = `../dashboard/chat.html?projectId=${projectId}`;
       }
     } catch (error) {
       console.error("Error cargando detalle:", error);
@@ -763,7 +764,7 @@ if (document.getElementById("projectDetailName")) {
   // We remove the embedded socket logic here to prevent crashes looking for non-existent elements.
   const btnChat = document.getElementById("btnOpenChat");
   if (btnChat) {
-      btnChat.href = `chat.html?projectId=${projectId}`;
+      btnChat.href = `../dashboard/chat.html?projectId=${projectId}`;
   }
 
   async function cargarActividad() {
