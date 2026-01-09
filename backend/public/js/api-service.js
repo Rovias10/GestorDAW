@@ -69,7 +69,13 @@ async function fetchConAuth(url, options = {}) {
     }
 
     if (!response.ok) {      
-      const msg = data.message || `Error ${response.status}`;
+      let msg = data.message || `Error ${response.status}`;
+      
+      
+      if (response.status === 404 && data.message && data.message.includes("Cannot")) {
+        msg = "Error de versión: Esta funcionalidad no está desplegada en el servidor todavía (Ruta no encontrada).";
+      }
+
       const err = new Error(msg);
       err.status = response.status;
       throw err;

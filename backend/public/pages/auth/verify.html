@@ -70,22 +70,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
 
+    <script type="module">
       import { verifyAccount } from "../../js/api-service.js";
       import "../../js/app.js";
 
-      // Dark Mode Check
       if (localStorage.getItem("darkMode") === "enabled") {
         document.body.classList.add("dark-mode");
       }
 
-      // 1. Si hay token en la URL, lo ponemos en el input
+     
       const urlParams = new URLSearchParams(window.location.search);
       const tokenUrl = urlParams.get("token");
       if (tokenUrl) {
         document.getElementById("tokenInput").value = tokenUrl;
       }
 
-      // 2. Al enviar el formulario
+      
       document
         .getElementById("verifyForm")
         .addEventListener("submit", async (e) => {
@@ -94,7 +94,6 @@
           const msgDiv = document.getElementById("verifyMessage");
           const btn = e.target.querySelector("button");
 
-          // Feedback visual de carga
           const textoOriginal = btn.textContent;
           btn.disabled = true;
           btn.textContent = "Verificando...";
@@ -102,7 +101,6 @@
           try {
             const res = await verifyAccount(token);
 
-            // Éxito
             msgDiv.style.display = "block";
             msgDiv.className = "mt-3 text-center text-success font-weight-bold";
             msgDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${res.message}<br>Redirigiendo...`;
@@ -111,7 +109,7 @@
               window.location.href = "login.html";
             }, 2000);
           } catch (error) {
-            // Error
+      
             btn.disabled = false;
             btn.textContent = textoOriginal;
             msgDiv.style.display = "block";

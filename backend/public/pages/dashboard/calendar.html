@@ -21,7 +21,7 @@
 
     <div class="wrapper">
 
-      <!-- Navbar -->
+    
       <nav class="main-header navbar navbar-expand navbar-white navbar-light">
         <ul class="navbar-nav">
           <li class="nav-item">
@@ -53,9 +53,7 @@
           </li>
         </ul>
       </nav>
-      <!-- /.navbar -->
-
-      <!-- Main Sidebar Container -->
+      
       <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <a href="index.html" class="brand-link">
           <span class="brand-text font-weight-light"><b>Gestor</b>DAW</span>
@@ -132,7 +130,6 @@
     <script type="module" src="../../js/app.js"></script>
 
 
-    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module">
       import * as apiService from '../../js/api-service.js';
@@ -152,23 +149,22 @@
           eventContent: function(arg) {
             const props = arg.event.extendedProps;
             let icon = 'fa-circle';
-            // Background Colors based on Priority (Pastel/Light versions)
-            let bgStyle = 'background-color: #e7f1ff; border-left: 4px solid #007bff;'; // Default Blue
+        
+            let bgStyle = 'background-color: #e7f1ff; border-left: 4px solid #007bff;';
             
             if (props.priority === 'high') {
                 icon = 'fa-arrow-up text-warning';
-                bgStyle = 'background-color: #fff3cd; border-left: 4px solid #ffc107;'; // Light Yellow/Orange
+                bgStyle = 'background-color: #fff3cd; border-left: 4px solid #ffc107;'; 
             }
             if (props.priority === 'critical') {
                 icon = 'fa-radiation text-danger';
-                bgStyle = 'background-color: #ffe2e5; border-left: 4px solid #dc3545;'; // Light Red
+                bgStyle = 'background-color: #ffe2e5; border-left: 4px solid #dc3545;';
             }
             
-            // Status Indicator & Overrides
             let statusClass = '';
             if (props.status === 'completed') {
                 statusClass = 'text-decoration-line-through opacity-50';
-                bgStyle = 'background-color: #d1e7dd; border-left: 4px solid #198754;'; // Light Green
+                bgStyle = 'background-color: #d1e7dd; border-left: 4px solid #198754;'; 
             }
 
             return {
@@ -185,7 +181,7 @@
             };
           },
           eventClick: function(info) {
-             // ... existing eventClick code (kept the same logic, just ensuring data flows) ...
+            
              info.jsEvent.preventDefault();
             
             const props = info.event.extendedProps;
@@ -247,10 +243,10 @@
           },
           events: async function (info, successCallback, failureCallback) {
             try {
-              // Cache bust to ensure fresh data
+            
               const tasks = await apiService.fetch(`/tasks/my-tasks?_=${new Date().getTime()}`);
               
-              // Get Current User info for Fallback
+            
               const tokenData = apiService.decodificarToken();
               let myName = "Mi usuario";
               let myId = null;
@@ -261,11 +257,9 @@
               }
 
               const events = tasks.map((t) => {
-                // Determine Assignee Name
-                // Prioritize explicit name from DB, then email, then manual check
+      
                 let assigneeName = t.assignee_name || t.assignee_email; 
-                
-                // Fallback: Check if it's assigned to ME (if DB didn't return name for some reason)
+             
                 if (!assigneeName) {
                     const taskUserId = t.assigned_to_user_id || t.user_id; 
                     
@@ -274,10 +268,10 @@
                     }
                 }
 
-                // If still nothing
+                
                 if (!assigneeName) assigneeName = "Sin Asignar";
 
-                let color = "transparent"; // We render custom HTML
+                let color = "transparent"; 
 
                 return {
                     title: t.title,
