@@ -157,6 +157,58 @@ exports.addCollaborator = async (req, res) => {
   }
 };
 
+exports.updateCollaboratorRole = async (req, res) => {
+  const projectId = req.params.id;
+  const userId = req.params.userId;
+  const { role } = req.body;
+  const currentUserId = req.user.id;
+
+  try {
+     const [p] = await db.query("SELECT owner_id FROM projects WHERE id = ?", [projectId]);
+     if (p.length === 0) return res.status(404).json({message: "Proyecto no encontrado"});
+     
+     if (p[0].owner_id !== currentUserId) {
+         return res.status(403).json({message: "Solo el dueño puede gestionar roles"});
+     }
+
+     if (parseInt(userId) === parseInt(p[0].owner_id)) {
+        return res.status(400).json({message: "No puedes cambiar el rol del dueño"});
+     }
+
+     await db.query("UPDATE project_collaborators SET role = ? WHERE project_id = ? AND user_id = ?", [role, projectId, userId]);
+     res.json({ message: "Rol actualizado" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al actualizar rol" });
+  }
+};
+
+exports.removeCollaborator = async (req, res) => {
+    const projectId = req.params.id;
+    const userId = req.params.userId;
+    const currentUserId = req.user.id;
+
+    try {
+        const [p] = await db.query("SELECT owner_id FROM projects WHERE id = ?", [projectId]);
+        if (p.length === 0) return res.status(404).json({message: "Proyecto no encontrado"});
+
+        if (p[0].owner_id !== currentUserId) {
+            return res.status(403).json({message: "Solo el dueño puede eliminar colaboradores"});
+        }
+        
+        if (parseInt(userId) === parseInt(p[0].owner_id)) {
+            return res.status(400).json({message: "No puedes eliminar al dueño"});
+        }
+
+        await db.query("DELETE FROM project_collaborators WHERE project_id = ? AND user_id = ?", [projectId, userId]);
+        res.json({message: "Colaborador eliminado"});
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({message: "Error al eliminar colaborador"});
+    }
+};
+
 exports.deleteProject = async (req, res) => {
   try {
     await db.query("DELETE FROM projects WHERE id = ? AND owner_id = ?", [

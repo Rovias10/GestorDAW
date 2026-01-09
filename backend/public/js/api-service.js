@@ -56,12 +56,20 @@ async function fetchConAuth(url, options = {}) {
       return { success: true };
     }
 
-    const data = await response.json();
+    let data;
+    try {
+        const text = await response.text();
+        try {
+            data = JSON.parse(text);
+        } catch {
+            data = { message: text || response.statusText };
+        }
+    } catch (e) {
+        data = { message: "Error de red o respuesta vacía" };
+    }
 
-    if (!response.ok) {
-      // Mejorar mensaje de error
+    if (!response.ok) {      
       const msg = data.message || `Error ${response.status}`;
-      // Incluir status en el error para poder filtrar
       const err = new Error(msg);
       err.status = response.status;
       throw err;
@@ -159,6 +167,19 @@ export function inviteUserToProject(projectId, email, role) {
   return fetchConAuth(`${API_URL}/projects/${projectId}/invite`, {
     method: "POST",
     body: JSON.stringify({ email, role }),
+  });
+}
+
+export function updateCollaboratorRole(projectId, userId, role) {
+  return fetchConAuth(`${API_URL}/projects/${projectId}/collaborators/${userId}`, {
+    method: "PUT",
+    body: JSON.stringify({ role })
+  });
+}
+
+export function removeCollaborator(projectId, userId) {
+  return fetchConAuth(`${API_URL}/projects/${projectId}/collaborators/${userId}`, {
+    method: "DELETE"
   });
 }
 

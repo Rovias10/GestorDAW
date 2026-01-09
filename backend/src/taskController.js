@@ -203,7 +203,7 @@ exports.getMyTasks = async (req, res) => {
   try {
     let isAdmin = false;
     try {
-      // Intentar verificar rol global (si existe la columna)
+      
       const [userRows] = await db.query("SELECT role FROM users WHERE id = ?", [
         userId,
       ]);
@@ -211,10 +211,10 @@ exports.getMyTasks = async (req, res) => {
         isAdmin = true;
       }
     } catch (e) {
-      // Si falla (ej. no existe columna role), asumimos no admin
+      
     }
 
-    // Use subqueries to guarantee we get the user data if the ID exists
+    
     let query = `
        SELECT 
           t.id, t.title, t.description, t.priority, t.status, t.due_date, t.created_at, t.user_id, t.project_id,
@@ -228,7 +228,7 @@ exports.getMyTasks = async (req, res) => {
     const params = [];
 
     if (!isAdmin) {
-      // Si no es admin global, filtramos por acceso al proyecto
+     
       query += ` LEFT JOIN project_collaborators pc ON p.id = pc.project_id AND pc.user_id = ? `;
       params.push(userId);
 
@@ -240,7 +240,7 @@ exports.getMyTasks = async (req, res) => {
 
     const [tasks] = await db.query(query, params);
     
-    // Debug output to server console
+   
     console.log(`[DEBUG] getMyTasks: Found ${tasks.length} tasks.`);
     if (tasks.length > 0) {
         const withUser = tasks.filter(t => t.user_id);
