@@ -1,148 +1,161 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="../img/favicon.png">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="../img/favicon.png" />
     <title>Quiénes Somos | GestorDAW</title>
     <!-- Fonts -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap">
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    />
     <!-- Bootstrap -->
-    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css" />
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../assets/css/modern-theme.css">
-    
+    <link rel="stylesheet" href="../assets/css/modern-theme.css" />
+
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-image: url('../img/bg-tech.svg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            min-height: 100vh;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background-image: url("../img/bg-tech.svg");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        min-height: 100vh;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
 
-        .team-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 2rem;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%;
-        }
+      .team-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+        height: 100%;
+      }
 
-        .team-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            background: rgba(255, 255, 255, 0.1);
-        }
+      .team-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        background: rgba(255, 255, 255, 0.1);
+      }
 
-        .member-photo {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #4318ff;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-        }
+      .member-photo {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #4318ff;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      }
 
-        .member-name {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: #fff;
-        }
+      .member-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #fff;
+      }
 
-        .member-role {
-            color: #a5b4fc;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-        }
+      .member-role {
+        color: #a5b4fc;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+      }
 
-        .member-bio {
-            color: #cbd5e1;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
+      .member-bio {
+        color: #cbd5e1;
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
 
-        .back-btn {
-            position: absolute;
-            top: 2rem;
-            left: 2rem;
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            background: rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
+      .back-btn {
+        position: absolute;
+        top: 2rem;
+        left: 2rem;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        background: rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+      }
 
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            text-decoration: none;
-        }
+      .back-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+      }
 
-        h1.page-title {
-            text-align: center;
-            font-weight: 800;
-            font-size: 3rem;
-            margin-bottom: 3rem;
-            background: linear-gradient(to right, #ffffff 0%, #a5b4fc 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+      h1.page-title {
+        text-align: center;
+        font-weight: 800;
+        font-size: 3rem;
+        margin-bottom: 3rem;
+        background: linear-gradient(to right, #ffffff 0%, #a5b4fc 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <a href="../index.html" class="back-btn">
-        <i class="fas fa-arrow-left"></i> Volver a Inicio
+      <i class="fas fa-arrow-left"></i> Volver a Inicio
     </a>
 
     <div class="container">
-        <h1 class="page-title animate__animated animate__fadeInDown">Nuestro Equipo</h1>
-        
-        <div class="row justify-content-center">
-          
-            <div class="col-md-5 mb-4 mb-md-0">
-                <div class="team-card">
-                    <img src="../img/rodrio.jpeg" alt="Miembro 1" class="member-photo">
-                    <div class="member-name">Rodrigo Villanueva Asensio</div>
-                    <div class="member-role">Developer</div>
-                    
-                </div>
-            </div>
+      <h1 class="page-title animate__animated animate__fadeInDown">
+        Nuestro Equipo
+      </h1>
 
-            
-            <div class="col-md-5">
-                <div class="team-card">
-                    <img src="../img/filip.png" alt="Miembro 2" class="member-photo" style="border-color: #05cd99;">
-                    <div class="member-name">Felipe Lluch Betés</div>
-                    <div class="member-role">Developer</div>
-                    
-                </div>
-            </div>
+      <div class="row justify-content-center">
+        <div class="col-md-5 mb-4 mb-md-0">
+          <div class="team-card">
+            <img
+              src="../img/rodrigo.jpg"
+              alt="Miembro 1"
+              class="member-photo"
+            />
+            <div class="member-name">Rodrigo Villanueva Asensio</div>
+            <div class="member-role">Developer</div>
+          </div>
         </div>
-    </div>
 
-</body>
+        <div class="col-md-5">
+          <div class="team-card">
+            <img
+              src="../img/filip.png"
+              alt="Miembro 2"
+              class="member-photo"
+              style="border-color: #05cd99"
+            />
+            <div class="member-name">Felipe Lluch Betés</div>
+            <div class="member-role">Developer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
